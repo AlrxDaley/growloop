@@ -2,41 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* CropTrackr Design System - Natural Garden Aesthetics */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Natural background tones */
+    --background: 45 20% 97%;
+    --foreground: 140 15% 15%;
 
+    /* Card system with warm earth tones */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 140 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 140 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary sage green palette */
+    --primary: 140 25% 45%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 140 35% 65%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary terracotta earth tones */
+    --secondary: 25 35% 85%;
+    --secondary-foreground: 140 25% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted natural tones */
+    --muted: 45 15% 92%;
+    --muted-foreground: 140 12% 55%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent golden sunlight */
+    --accent: 45 65% 88%;
+    --accent-foreground: 140 25% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Success green for healthy plants */
+    --success: 120 40% 50%;
+    --success-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Warning amber for plant issues */
+    --warning: 35 85% 65%;
+    --warning-foreground: 25 25% 15%;
 
-    --radius: 0.5rem;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Natural borders and inputs */
+    --border: 45 20% 88%;
+    --input: 45 20% 92%;
+    --ring: 140 25% 45%;
+
+    /* Natural gradients and effects */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-earth: linear-gradient(180deg, hsl(var(--accent)), hsl(var(--secondary)));
+    --gradient-sunrise: linear-gradient(45deg, hsl(45 75% 85%), hsl(35 65% 75%));
+    
+    /* Shadows with natural depth */
+    --shadow-garden: 0 4px 20px -4px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 2px 10px -2px hsl(140 20% 60% / 0.1);
+    --shadow-glow: 0 0 30px hsl(var(--primary-glow) / 0.3);
+    
+    /* Animation timings */
+    --transition-gentle: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-grow: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
