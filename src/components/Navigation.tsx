@@ -14,9 +14,9 @@ const Navigation = () => {
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
               <Leaf className="w-5 h-5 text-primary-foreground animate-leaf-sway" />
             </div>
-            <span className="text-xl font-serif font-bold text-foreground">
+            <a href="/" className="text-xl font-serif font-bold text-foreground hover:text-primary transition-colors">
               CropTrackr
-            </span>
+            </a>
           </div>
 
           {/* Desktop Navigation */}
