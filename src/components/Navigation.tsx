@@ -27,7 +27,7 @@ const Navigation = () => {
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
               How it Works
             </a>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
               Pricing
             </a>
             <Button variant="outline" size="sm">
@@ -64,7 +64,7 @@ const Navigation = () => {
               <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors py-2">
                 How it Works
               </a>
-              <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors py-2">
+              <a href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors py-2">
                 Pricing
               </a>
               <div className="flex flex-col space-y-2 pt-2">
