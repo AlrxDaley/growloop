@@ -32,7 +32,8 @@ const Features = () => {
         {
           icon: <Sprout className="w-5 h-5" />,
           title: "Plant & Zone Tracking",
-          description: "Track up to 10 plants across 2 active garden zones"
+          description: "Track up to 10 plants across 2 active garden zones",
+          link: "/plant-tracker"
         },
         {
           icon: <Camera className="w-5 h-5" />,
@@ -183,8 +184,9 @@ const Features = () => {
                 {category.features.map((feature, featureIndex) => (
                   <Card 
                     key={featureIndex} 
-                    className="hover:shadow-card transition-all duration-300 hover:transform hover:scale-105 group animate-scale-in"
+                    className={`hover:shadow-card transition-all duration-300 hover:transform hover:scale-105 group animate-scale-in ${(feature as any).link ? 'cursor-pointer' : ''}`}
                     style={{ animationDelay: `${(categoryIndex * 0.2) + (featureIndex * 0.1)}s` }}
+                    onClick={(feature as any).link ? () => window.location.href = (feature as any).link : undefined}
                   >
                     <CardHeader className="pb-4">
                       <div className="flex items-center gap-3">
