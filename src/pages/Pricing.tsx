@@ -15,7 +15,6 @@ import {
   Flower
 } from "lucide-react";
 import { useState } from "react";
-import SproutlyChat from "@/components/SproutlyChat";
 
 const Pricing = () => {
   const [isYearly, setIsYearly] = useState(false);
@@ -308,7 +307,6 @@ const Pricing = () => {
           </div>
         </div>
       </section>
-      <SproutlyChat />
     </div>
   );
 };
