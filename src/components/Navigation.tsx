@@ -8,11 +8,22 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <a href="/" className="text-xl font-serif font-bold text-foreground hover:text-primary transition-colors">
-              GrowLoop
+            <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <img 
+                src="/growloop-logo.png" 
+                alt="GrowLoop" 
+                className="w-10 h-10 rounded-lg object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center hidden">
+                <Leaf className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-serif font-bold text-foreground hover:text-primary transition-colors">
+                GrowLoop
+              </span>
             </a>
           </div>
 
