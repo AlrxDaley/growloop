@@ -26,9 +26,11 @@ const Navigation = () => {
             <a href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
               Pricing
             </a>
-            <Button variant="outline" size="sm">
-              Sign In
-            </Button>
+            <a href="/signin">
+              <Button variant="outline" size="sm">
+                Sign In
+              </Button>
+            </a>
             <Button variant="garden" size="sm">
               Try Free
             </Button>
@@ -55,9 +57,11 @@ const Navigation = () => {
                 Pricing
               </a>
               <div className="flex flex-col space-y-2 pt-2">
-                <Button variant="outline" size="sm">
-                  Sign In
-                </Button>
+                <a href="/signin">
+                  <Button variant="outline" size="sm">
+                    Sign In
+                  </Button>
+                </a>
                 <Button variant="garden" size="sm">
                   Try Free
                 </Button>
