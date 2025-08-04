@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Leaf, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -8,11 +8,9 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Leaf className="w-5 h-5 text-primary-foreground animate-leaf-sway" />
-            </div>
-            <a href="/" className="text-xl font-serif font-bold text-foreground hover:text-primary transition-colors">GrowLoop
-          </a>
+            <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <img src="/growloop-logo.png" alt="GrowLoop" className="w-10 h-10" />
+            </a>
           </div>
 
           {/* Desktop Navigation */}
