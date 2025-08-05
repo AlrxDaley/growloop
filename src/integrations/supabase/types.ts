@@ -14,7 +14,328 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          address: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      photos: {
+        Row: {
+          client_id: string
+          created_at: string
+          description: string | null
+          file_path: string
+          id: string
+          plant_id: string | null
+          tags: string[] | null
+          taken_at: string
+          title: string
+          updated_at: string
+          user_id: string
+          zone_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          description?: string | null
+          file_path: string
+          id?: string
+          plant_id?: string | null
+          tags?: string[] | null
+          taken_at?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          zone_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          id?: string
+          plant_id?: string | null
+          tags?: string[] | null
+          taken_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_plant_id_fkey"
+            columns: ["plant_id"]
+            isOneToOne: false
+            referencedRelation: "plants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plants: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          planted_date: string | null
+          updated_at: string
+          user_id: string
+          variety: string | null
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          planted_date?: string | null
+          updated_at?: string
+          user_id: string
+          variety?: string | null
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          planted_date?: string | null
+          updated_at?: string
+          user_id?: string
+          variety?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plants_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string
+          estimated_time_minutes: number | null
+          id: string
+          priority: string
+          recurring: boolean | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          zone_id: string | null
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date: string
+          estimated_time_minutes?: number | null
+          id?: string
+          priority?: string
+          recurring?: boolean | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          zone_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          estimated_time_minutes?: number | null
+          id?: string
+          priority?: string
+          recurring?: boolean | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visits: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          priority: string
+          scheduled_date: string
+          scheduled_time: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          zones: string[] | null
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          priority?: string
+          scheduled_date: string
+          scheduled_time?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          zones?: string[] | null
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          priority?: string
+          scheduled_date?: string
+          scheduled_time?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          zones?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zones: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          plant_count: number | null
+          size: string | null
+          soil_type: string | null
+          sunlight: string | null
+          updated_at: string
+          user_id: string
+          watering_schedule: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          plant_count?: number | null
+          size?: string | null
+          soil_type?: string | null
+          sunlight?: string | null
+          updated_at?: string
+          user_id: string
+          watering_schedule?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          plant_count?: number | null
+          size?: string | null
+          soil_type?: string | null
+          sunlight?: string | null
+          updated_at?: string
+          user_id?: string
+          watering_schedule?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zones_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
