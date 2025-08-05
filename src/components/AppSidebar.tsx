@@ -41,10 +41,10 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>GrowLoop CRM</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton>
+                  <SidebarMenuButton className="w-full justify-start h-10">
                     <NavLink to={item.url} end className={getNavCls}>
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
