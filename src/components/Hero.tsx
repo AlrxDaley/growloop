@@ -4,39 +4,44 @@ import heroImage from "@/assets/hero-garden.jpg";
 const Hero = () => {
   const features = [{
     icon: Sprout,
-    title: "Zone-Based Tracking",
-    description: "Organize your garden into beds and zones for better plant management"
+    title: "Client Management",
+    description: "Track client profiles, garden zones, and service history in one place"
   }, {
     icon: Camera,
-    title: "Plant Journal",
-    description: "Log photos, notes, and growth updates for each plant"
+    title: "Photo Documentation",
+    description: "Log progress photos and maintain visual records for each project"
   }, {
     icon: Brain,
-    title: "AI Plant Doctor",
-    description: "Get instant diagnosis and treatment for plant health issues"
+    title: "Task Scheduling",
+    description: "Schedule visits, set reminders, and manage recurring maintenance tasks"
   }, {
     icon: Bell,
-    title: "Smart Reminders",
-    description: "Never miss watering, pruning, or feeding schedules"
+    title: "Mobile Dashboard",
+    description: "Access today's schedule and client info on-the-go from any device"
   }];
   return <div className="min-h-screen bg-gradient-earth">
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-16 pb-12">
         <div className="text-center mb-16">
           <div className="mb-8">
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground mb-6 animate-grow">GrowLoop
+            <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground mb-6 animate-grow">GrowLoop CRM
           </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-2 font-light">
-              Grow Better. Know Smarter.
+              Manage. Track. Grow Your Business.
             </p>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Your garden's AI companion for tracking plants, diagnosing issues, and growing with confidence
+              The complete client management system for garden professionals, freelancers, and small businesses
             </p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button variant="garden" size="lg" className="text-lg px-8 py-3">
-              Start Growing
+            <Button 
+              variant="garden" 
+              size="lg" 
+              className="text-lg px-8 py-3"
+              onClick={() => window.location.href = '/dashboard'}
+            >
+              Launch CRM
             </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-3">
               Learn More
@@ -75,15 +80,20 @@ const Hero = () => {
         {/* Value Proposition */}
         <div className="text-center mt-16 max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-6">
-            The gardening sidekick you've always needed
+            The business management tool garden professionals need
           </h2>
           <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-            Designed for hobby growers who want less guessing and more growing. Track what's planted where, 
-            log your plant's journey, and get AI-powered help when things look off. No spreadsheets. 
-            No pesticide upsells. Just a smart, friendly companion that grows with you.
+            Built for solo gardeners, freelancers, and small garden businesses. Manage clients, 
+            track zones, schedule tasks, and document progress. Say goodbye to messy spreadsheets 
+            and missed appointments. Focus on growing great gardens while we handle the business side.
           </p>
-          <Button variant="earth" size="lg" className="text-lg px-8 py-3">
-            Get Started Free
+          <Button 
+            variant="earth" 
+            size="lg" 
+            className="text-lg px-8 py-3"
+            onClick={() => window.location.href = '/dashboard'}
+          >
+            Try CRM Free
           </Button>
         </div>
       </div>
