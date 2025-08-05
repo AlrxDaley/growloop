@@ -1,48 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
-import { useNavigate } from "react-router-dom";
 
-const SignIn = () => {
-  const [signInEmail, setSignInEmail] = useState("");
-  const [signInPassword, setSignInPassword] = useState("");
-  const [signUpEmail, setSignUpEmail] = useState("");
-  const [signUpPassword, setSignUpPassword] = useState("");
-  const [signUpName, setSignUpName] = useState("");
+const Auth = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  const handleSignIn = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Fake sign in - just redirect to plant tracker for demo
-    navigate("/plant-tracker");
+    setLoading(true);
+    
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Signed in successfully",
+      });
+      navigate("/dashboard");
+    }
+    setLoading(false);
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Fake sign up - just redirect to plant tracker for demo
-    navigate("/plant-tracker");
+    setLoading(true);
+    
+    const { error } = await signUp(email, password);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Account created! Please check your email to verify your account.",
+      });
+    }
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-        <div className="w-full max-w-md">
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Leaf className="w-8 h-8 text-primary-foreground animate-leaf-sway" />
-            </div>
-            <h1 className="text-3xl font-serif font-bold text-foreground mb-2">
+            <h1 className="text-4xl font-serif font-bold text-foreground mb-2">
               Welcome to GrowLoop
             </h1>
             <p className="text-muted-foreground">
-              Join thousands of gardeners growing smarter
+              Sign in to your account or create a new one
             </p>
           </div>
 
@@ -57,19 +92,19 @@ const SignIn = () => {
                 <CardHeader>
                   <CardTitle>Sign In</CardTitle>
                   <CardDescription>
-                    Enter your credentials to access your garden dashboard
+                    Enter your email and password to access your account
                   </CardDescription>
                 </CardHeader>
-                <form onSubmit={handleSignIn}>
-                  <CardContent className="space-y-4">
+                <CardContent>
+                  <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signin-email">Email</Label>
                       <Input
                         id="signin-email"
                         type="email"
                         placeholder="Enter your email"
-                        value={signInEmail}
-                        onChange={(e) => setSignInEmail(e.target.value)}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                       />
                     </div>
@@ -79,21 +114,16 @@ const SignIn = () => {
                         id="signin-password"
                         type="password"
                         placeholder="Enter your password"
-                        value={signInPassword}
-                        onChange={(e) => setSignInPassword(e.target.value)}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                       />
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex flex-col space-y-4">
-                    <Button type="submit" className="w-full" variant="garden">
-                      Sign In
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Signing in..." : "Sign In"}
                     </Button>
-                    <Button type="button" variant="outline" className="w-full">
-                      Forgot Password?
-                    </Button>
-                  </CardFooter>
-                </form>
+                  </form>
+                </CardContent>
               </Card>
             </TabsContent>
             
@@ -102,19 +132,19 @@ const SignIn = () => {
                 <CardHeader>
                   <CardTitle>Create Account</CardTitle>
                   <CardDescription>
-                    Start your gardening journey with GrowLoop
+                    Fill in your information to create a new account
                   </CardDescription>
                 </CardHeader>
-                <form onSubmit={handleSignUp}>
-                  <CardContent className="space-y-4">
+                <CardContent>
+                  <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">Full Name</Label>
                       <Input
                         id="signup-name"
                         type="text"
                         placeholder="Enter your full name"
-                        value={signUpName}
-                        onChange={(e) => setSignUpName(e.target.value)}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         required
                       />
                     </div>
@@ -124,8 +154,8 @@ const SignIn = () => {
                         id="signup-email"
                         type="email"
                         placeholder="Enter your email"
-                        value={signUpEmail}
-                        onChange={(e) => setSignUpEmail(e.target.value)}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                       />
                     </div>
@@ -135,21 +165,16 @@ const SignIn = () => {
                         id="signup-password"
                         type="password"
                         placeholder="Create a password"
-                        value={signUpPassword}
-                        onChange={(e) => setSignUpPassword(e.target.value)}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                       />
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex flex-col space-y-4">
-                    <Button type="submit" className="w-full" variant="garden">
-                      Create Account
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Creating account..." : "Create Account"}
                     </Button>
-                    <p className="text-xs text-muted-foreground text-center">
-                      By creating an account, you agree to our Terms of Service and Privacy Policy
-                    </p>
-                  </CardFooter>
-                </form>
+                  </form>
+                </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
@@ -159,4 +184,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default Auth;

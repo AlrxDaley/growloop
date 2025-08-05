@@ -4,66 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckSquare, Clock, Calendar, User, MapPin, Plus, Filter } from "lucide-react";
+import { useTasks } from "@/hooks/useTasks";
 
 const Tasks = () => {
-  const [filter, setFilter] = useState("all");
-
-  // Mock tasks data
-  const tasks = [
-    {
-      id: 1,
-      title: "Water tomato plants",
-      description: "Check soil moisture and water if needed",
-      client: "Sarah Johnson",
-      zone: "Vegetable Garden",
-      dueDate: "2024-01-20",
-      priority: "high",
-      status: "pending",
-      recurring: true,
-      estimatedTime: "30 min"
-    },
-    {
-      id: 2,
-      title: "Prune rose bushes",
-      description: "Annual winter pruning for rose garden",
-      client: "Mike Chen",
-      zone: "Front Garden",
-      dueDate: "2024-01-22",
-      priority: "medium",
-      status: "pending",
-      recurring: false,
-      estimatedTime: "2 hours"
-    },
-    {
-      id: 3,
-      title: "Plant spring bulbs",
-      description: "Plant tulip and daffodil bulbs in designated areas",
-      client: "Emma Davis",
-      zone: "Border Beds",
-      dueDate: "2024-01-18",
-      priority: "low",
-      status: "completed",
-      recurring: false,
-      estimatedTime: "1 hour"
-    },
-    {
-      id: 4,
-      title: "Apply winter fertilizer",
-      description: "Slow-release fertilizer for lawn areas",
-      client: "Sarah Johnson",
-      zone: "Lawn",
-      dueDate: "2024-01-25",
-      priority: "medium",
-      status: "pending",
-      recurring: true,
-      estimatedTime: "45 min"
-    }
-  ];
+  const { tasks, isLoading, completeTask } = useTasks();
 
   const getFilteredTasks = (status: string) => {
     if (status === "all") return tasks;
     return tasks.filter(task => task.status === status);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -103,11 +62,11 @@ const Tasks = () => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <User className="w-3 h-3 mr-1 text-muted-foreground" />
-                <span className="text-muted-foreground">{task.client}</span>
+                <span className="text-muted-foreground">{task.client?.name}</span>
               </div>
               <div className="flex items-center">
                 <MapPin className="w-3 h-3 mr-1 text-muted-foreground" />
-                <span className="text-muted-foreground">{task.zone}</span>
+                <span className="text-muted-foreground">{task.zone?.name || 'No zone'}</span>
               </div>
             </div>
           </div>
@@ -117,32 +76,39 @@ const Tasks = () => {
             <div className="flex items-center">
               <Calendar className="w-3 h-3 mr-1 text-muted-foreground" />
               <span className="text-muted-foreground">
-                Due: {new Date(task.dueDate).toLocaleDateString()}
+                Due: {new Date(task.due_date).toLocaleDateString()}
               </span>
             </div>
             <div className="flex items-center">
               <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
-              <span className="text-muted-foreground">{task.estimatedTime}</span>
+              <span className="text-muted-foreground">
+                {task.estimated_time_minutes ? `${task.estimated_time_minutes} min` : 'No estimate'}
+              </span>
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex space-x-2 pt-2">
-            {task.status === "pending" ? (
-              <>
-                <Button size="sm" className="flex-1">
-                  <CheckSquare className="w-3 h-3 mr-1" />
-                  Complete
-                </Button>
-                <Button variant="outline" size="sm">
-                  Edit
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" size="sm" className="flex-1">
-                View Details
+          {task.status === "pending" ? (
+            <>
+              <Button 
+                size="sm" 
+                className="flex-1"
+                onClick={() => completeTask.mutate(task.id)}
+                disabled={completeTask.isPending}
+              >
+                <CheckSquare className="w-3 h-3 mr-1" />
+                Complete
               </Button>
-            )}
+              <Button variant="outline" size="sm">
+                Edit
+              </Button>
+            </>
+          ) : (
+            <Button variant="outline" size="sm" className="flex-1">
+              View Details
+            </Button>
+          )}
           </div>
         </div>
       </CardContent>

@@ -1,9 +1,12 @@
-import { Calendar, Users, MapPin, Camera, BarChart3, CheckSquare } from "lucide-react";
+import { Calendar, Users, MapPin, Camera, BarChart3, CheckSquare, LogOut } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -14,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const items = [
-  { title: "Dashboard", url: "/", icon: BarChart3 },
+  { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
   { title: "Clients", url: "/clients", icon: Users },
   { title: "Tasks", url: "/tasks", icon: CheckSquare },
   { title: "Zones", url: "/zones", icon: MapPin },
@@ -24,6 +27,7 @@ const items = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { signOut } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
@@ -56,6 +60,29 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <div className="space-y-2 p-2">
+          {!collapsed && (
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start" 
+              onClick={() => signOut()}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          )}
+          {collapsed && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => signOut()}
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

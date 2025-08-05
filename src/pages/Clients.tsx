@@ -4,51 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Mail, Calendar, Plus, Search } from "lucide-react";
+import { useClients } from "@/hooks/useClients";
 
 const Clients = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Mock client data
-  const clients = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      email: "sarah@email.com",
-      phone: "(555) 123-4567",
-      address: "123 Oak Street, Springfield",
-      zones: 3,
-      lastVisit: "2024-01-15",
-      status: "active",
-      notes: "Prefers organic methods only"
-    },
-    {
-      id: 2,
-      name: "Mike Chen",
-      email: "mike.chen@email.com",
-      phone: "(555) 987-6543",
-      address: "456 Pine Avenue, Springfield",
-      zones: 2,
-      lastVisit: "2024-01-12",
-      status: "active",
-      notes: "Large vegetable garden, weekly visits"
-    },
-    {
-      id: 3,
-      name: "Emma Davis",
-      email: "emma.davis@email.com",
-      phone: "(555) 456-7890",
-      address: "789 Maple Drive, Springfield",
-      zones: 4,
-      lastVisit: "2024-01-10",
-      status: "pending",
-      notes: "New client, initial consultation scheduled"
-    }
-  ];
+  const { clients, isLoading } = useClients();
 
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading clients...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -109,11 +84,13 @@ const Clients = () => {
 
                 {/* Stats */}
                 <div className="flex justify-between text-sm">
-                  <span><strong>{client.zones}</strong> zones</span>
-                  <span className="text-muted-foreground">
-                    <Calendar className="w-3 h-3 inline mr-1" />
-                    Last visit: {new Date(client.lastVisit).toLocaleDateString()}
-                  </span>
+                  <span><strong>{client.zones?.length || 0}</strong> zones</span>
+                  {client.last_visit && (
+                    <span className="text-muted-foreground">
+                      <Calendar className="w-3 h-3 inline mr-1" />
+                      Last visit: {new Date(client.last_visit).toLocaleDateString()}
+                    </span>
+                  )}
                 </div>
 
                 {/* Notes */}

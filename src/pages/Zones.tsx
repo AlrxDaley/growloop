@@ -4,70 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { MapPin, Thermometer, Droplets, Sun, Search, Plus, User } from "lucide-react";
+import { useZones } from "@/hooks/useZones";
 
 const Zones = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Mock zones data
-  const zones = [
-    {
-      id: 1,
-      name: "Front Garden",
-      client: "Sarah Johnson",
-      size: "200 sq ft",
-      plantCount: 15,
-      soilType: "Clay",
-      sunlight: "Full Sun",
-      wateringSchedule: "3x/week",
-      lastMaintenance: "2024-01-15",
-      plants: ["Roses", "Lavender", "Hostas"],
-      notes: "Recently added automatic irrigation"
-    },
-    {
-      id: 2,
-      name: "Vegetable Garden",
-      client: "Sarah Johnson",
-      size: "400 sq ft",
-      plantCount: 28,
-      soilType: "Loam",
-      sunlight: "Full Sun",
-      wateringSchedule: "Daily",
-      lastMaintenance: "2024-01-18",
-      plants: ["Tomatoes", "Peppers", "Lettuce", "Carrots"],
-      notes: "Peak growing season, monitor for pests"
-    },
-    {
-      id: 3,
-      name: "Herb Patch",
-      client: "Mike Chen",
-      size: "50 sq ft",
-      plantCount: 8,
-      soilType: "Sandy",
-      sunlight: "Partial Sun",
-      wateringSchedule: "2x/week",
-      lastMaintenance: "2024-01-12",
-      plants: ["Basil", "Rosemary", "Thyme", "Oregano"],
-      notes: "Harvest regularly to encourage growth"
-    },
-    {
-      id: 4,
-      name: "Shade Border",
-      client: "Emma Davis",
-      size: "150 sq ft",
-      plantCount: 12,
-      soilType: "Clay",
-      sunlight: "Shade",
-      wateringSchedule: "2x/week",
-      lastMaintenance: "2024-01-10",
-      plants: ["Ferns", "Astilbe", "Heuchera"],
-      notes: "New planting, monitor establishment"
-    }
-  ];
+  const { zones, isLoading } = useZones();
 
   const filteredZones = zones.filter(zone =>
     zone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    zone.client.toLowerCase().includes(searchTerm.toLowerCase())
+    zone.client?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading zones...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getSunlightIcon = (sunlight: string) => {
     return <Sun className="w-4 h-4 text-yellow-500" />;
@@ -111,7 +67,7 @@ const Zones = () => {
                   </CardTitle>
                   <CardDescription className="flex items-center mt-1">
                     <User className="w-3 h-3 mr-1" />
-                    {zone.client}
+                    {zone.client?.name}
                   </CardDescription>
                 </div>
               </div>
@@ -126,7 +82,7 @@ const Zones = () => {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Plants</p>
-                    <p className="font-semibold">{zone.plantCount}</p>
+                    <p className="font-semibold">{zone.plant_count}</p>
                   </div>
                 </div>
 
@@ -135,13 +91,13 @@ const Zones = () => {
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center">
                       {getSunlightIcon(zone.sunlight)}
-                      <span className="ml-2 text-muted-foreground">{zone.sunlight}</span>
+                      <span className="ml-2 text-muted-foreground">{zone.sunlight || 'Unknown'}</span>
                     </div>
-                    <span className="text-muted-foreground">{zone.soilType} soil</span>
+                    <span className="text-muted-foreground">{zone.soil_type || 'Unknown'} soil</span>
                   </div>
                   <div className="flex items-center text-sm">
                     <Droplets className="w-4 h-4 text-blue-500 mr-2" />
-                    <span className="text-muted-foreground">Water: {zone.wateringSchedule}</span>
+                    <span className="text-muted-foreground">Water: {zone.watering_schedule || 'No schedule'}</span>
                   </div>
                 </div>
 
@@ -149,15 +105,18 @@ const Zones = () => {
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Current Plants:</p>
                   <div className="flex flex-wrap gap-1">
-                    {zone.plants.slice(0, 3).map((plant, index) => (
+                    {zone.plants?.slice(0, 3).map((plant, index) => (
                       <Badge key={index} variant="secondary" className="text-xs">
-                        {plant}
+                        {plant.name}
                       </Badge>
                     ))}
-                    {zone.plants.length > 3 && (
+                    {zone.plants && zone.plants.length > 3 && (
                       <Badge variant="outline" className="text-xs">
                         +{zone.plants.length - 3} more
                       </Badge>
+                    )}
+                    {(!zone.plants || zone.plants.length === 0) && (
+                      <span className="text-xs text-muted-foreground">No plants recorded</span>
                     )}
                   </div>
                 </div>
@@ -171,7 +130,7 @@ const Zones = () => {
 
                 {/* Last Maintenance */}
                 <p className="text-xs text-muted-foreground">
-                  Last maintained: {new Date(zone.lastMaintenance).toLocaleDateString()}
+                  Created: {new Date(zone.created_at).toLocaleDateString()}
                 </p>
 
                 {/* Actions */}
