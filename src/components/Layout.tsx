@@ -15,12 +15,17 @@ export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Layout: Auth state check - loading:', loading, 'user:', user?.email || 'none');
     if (!loading && !user) {
+      console.log('Layout: No user found, redirecting to auth');
       navigate("/auth");
+    } else if (user) {
+      console.log('Layout: User authenticated:', user.email);
     }
   }, [user, loading, navigate]);
 
   if (loading) {
+    console.log('Layout: Still loading auth state...');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">Loading...</p>
@@ -29,6 +34,7 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   if (!user) {
+    console.log('Layout: No user, returning null');
     return null;
   }
   return (
