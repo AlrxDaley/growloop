@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,33 +15,46 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    console.log('Auth page: user state changed', user?.email);
+    if (user && !authLoading) {
+      console.log('Auth page: redirecting to dashboard');
       navigate("/dashboard");
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) {
+    console.log('Auth page: showing loading state');
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
+    console.log('Auth page: handling sign in');
     const { error } = await signIn(email, password);
     
     if (error) {
+      console.error('Auth page: sign in error', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "An error occurred during sign in",
         variant: "destructive",
       });
     } else {
+      console.log('Auth page: sign in successful');
       toast({
         title: "Success",
         description: "Signed in successfully",
       });
-      navigate("/dashboard");
     }
     setLoading(false);
   };
@@ -49,15 +63,18 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     
+    console.log('Auth page: handling sign up');
     const { error } = await signUp(email, password);
     
     if (error) {
+      console.error('Auth page: sign up error', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "An error occurred during sign up",
         variant: "destructive",
       });
     } else {
+      console.log('Auth page: sign up successful');
       toast({
         title: "Success",
         description: "Account created! Please check your email to verify your account.",
