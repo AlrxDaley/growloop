@@ -2,27 +2,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, CheckSquare, Clock, AlertCircle } from "lucide-react";
-import { useClients } from "@/hooks/useClients";
-import { useTasks } from "@/hooks/useTasks";
-import { useZones } from "@/hooks/useZones";
 
 const Dashboard = () => {
-  const { clients } = useClients();
-  const { tasks } = useTasks();
-  const { zones } = useZones();
+  // Mock data for today's visits and tasks
+  const todaysVisits = [
+    {
+      id: 1,
+      clientName: "Sarah Johnson",
+      address: "123 Oak Street",
+      time: "9:00 AM",
+      zones: ["Front Garden", "Herb Patch"],
+      priority: "high"
+    },
+    {
+      id: 2,
+      clientName: "Mike Chen",
+      address: "456 Pine Avenue",
+      time: "2:00 PM",
+      zones: ["Backyard Vegetables"],
+      priority: "medium"
+    }
+  ];
 
-  // Calculate real stats from actual data
-  const todaysVisits: any[] = []; // No visits implementation yet
-  const urgentTasks = tasks.filter(task => 
-    task.status === 'pending' && 
-    task.priority === 'high'
-  ).slice(0, 3);
+  const urgentTasks = [
+    { id: 1, task: "Water tomatoes at Sarah's", due: "Today", client: "Sarah Johnson" },
+    { id: 2, task: "Prune roses at Mike's", due: "Tomorrow", client: "Mike Chen" },
+    { id: 3, task: "Plant new seedlings", due: "This week", client: "Emma Davis" }
+  ];
 
   const stats = [
-    { label: "Today's Visits", value: todaysVisits.length.toString(), icon: Calendar },
-    { label: "Active Clients", value: clients.filter(c => c.status === 'active').length.toString(), icon: Users },
-    { label: "Pending Tasks", value: tasks.filter(t => t.status === 'pending').length.toString(), icon: CheckSquare },
-    { label: "Zones Managed", value: zones.length.toString(), icon: MapPin }
+    { label: "Today's Visits", value: "2", icon: Calendar },
+    { label: "Active Clients", value: "12", icon: Users },
+    { label: "Pending Tasks", value: "8", icon: CheckSquare },
+    { label: "Zones Managed", value: "24", icon: MapPin }
   ];
 
   return (
@@ -67,41 +79,32 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {todaysVisits.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No visits scheduled for today</p>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    Schedule Visit
+              {todaysVisits.map((visit) => (
+                <div key={visit.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h4 className="font-semibold">{visit.clientName}</h4>
+                      <Badge variant={visit.priority === 'high' ? 'destructive' : 'secondary'}>
+                        {visit.priority}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      <MapPin className="w-3 h-3 inline mr-1" />
+                      {visit.address}
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-3 h-3" />
+                      <span className="text-sm">{visit.time}</span>
+                      <span className="text-sm text-muted-foreground">
+                        • {visit.zones.join(", ")}
+                      </span>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    View Details
                   </Button>
                 </div>
-              ) : (
-                todaysVisits.map((visit) => (
-                  <div key={visit.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h4 className="font-semibold">{visit.clientName}</h4>
-                        <Badge variant={visit.priority === 'high' ? 'destructive' : 'secondary'}>
-                          {visit.priority}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        <MapPin className="w-3 h-3 inline mr-1" />
-                        {visit.address}
-                      </p>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-3 h-3" />
-                        <span className="text-sm">{visit.time}</span>
-                        <span className="text-sm text-muted-foreground">
-                          • {visit.zones.join(", ")}
-                        </span>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                  </div>
-                ))
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -117,28 +120,19 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {urgentTasks.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No urgent tasks</p>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    Create Task
+              {urgentTasks.map((task) => (
+                <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex-1">
+                    <p className="font-medium">{task.task}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {task.client} • Due {task.due}
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm">
+                    <CheckSquare className="w-4 h-4" />
                   </Button>
                 </div>
-              ) : (
-                urgentTasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <p className="font-medium">{task.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {task.client?.name} • Due {new Date(task.due_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <CheckSquare className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>
