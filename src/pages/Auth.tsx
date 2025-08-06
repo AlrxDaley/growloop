@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,35 +14,28 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  console.log("Auth component rendered", { user, authLoading });
-
   useEffect(() => {
-    console.log("Auth useEffect triggered", { user, authLoading });
-    if (!authLoading && user) {
-      console.log("Redirecting to dashboard");
+    if (user) {
       navigate("/dashboard");
     }
-  }, [user, authLoading, navigate]);
+  }, [user, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sign in attempted");
     setLoading(true);
     
     const { error } = await signIn(email, password);
     
     if (error) {
-      console.error("Sign in error:", error);
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     } else {
-      console.log("Sign in successful");
       toast({
         title: "Success",
         description: "Signed in successfully",
@@ -55,20 +47,17 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sign up attempted");
     setLoading(true);
     
     const { error } = await signUp(email, password);
     
     if (error) {
-      console.error("Sign up error:", error);
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     } else {
-      console.log("Sign up successful");
       toast({
         title: "Success",
         description: "Account created! Please check your email to verify your account.",
@@ -76,30 +65,6 @@ const Auth = () => {
     }
     setLoading(false);
   };
-
-  // Show loading state while auth is initializing
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-        <Navigation />
-        <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-          <p className="text-muted-foreground">Loading authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If user is already logged in, don't render the form (redirect is handled in useEffect)
-  if (user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-        <Navigation />
-        <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
