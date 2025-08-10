@@ -5,37 +5,22 @@ import { Calendar, MapPin, Users, CheckSquare, Clock, AlertCircle } from "lucide
 
 const Dashboard = () => {
   // Mock data for today's visits and tasks
-  const todaysVisits = [
-    {
-      id: 1,
-      clientName: "Sarah Johnson",
-      address: "123 Oak Street",
-      time: "9:00 AM",
-      zones: ["Front Garden", "Herb Patch"],
-      priority: "high"
-    },
-    {
-      id: 2,
-      clientName: "Mike Chen",
-      address: "456 Pine Avenue",
-      time: "2:00 PM",
-      zones: ["Backyard Vegetables"],
-      priority: "medium"
-    }
-  ];
+  // No seeded visits; will load per-account data from Supabase later
+  const todaysVisits: any[] = [];
 
-  const urgentTasks = [
-    { id: 1, task: "Water tomatoes at Sarah's", due: "Today", client: "Sarah Johnson" },
-    { id: 2, task: "Prune roses at Mike's", due: "Tomorrow", client: "Mike Chen" },
-    { id: 3, task: "Plant new seedlings", due: "This week", client: "Emma Davis" }
-  ];
 
+  // No seeded tasks; per-account tasks coming from Supabase
+  const urgentTasks: any[] = [];
+
+
+  // Zeroed stats until user-scoped data is loaded
   const stats = [
-    { label: "Today's Visits", value: "2", icon: Calendar },
-    { label: "Active Clients", value: "12", icon: Users },
-    { label: "Pending Tasks", value: "8", icon: CheckSquare },
-    { label: "Zones Managed", value: "24", icon: MapPin }
+    { label: "Today's Visits", value: "0", icon: Calendar },
+    { label: "Active Clients", value: "0", icon: Users },
+    { label: "Pending Tasks", value: "0", icon: CheckSquare },
+    { label: "Zones Managed", value: "0", icon: MapPin }
   ];
+
 
   return (
     <div className="space-y-6">

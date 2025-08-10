@@ -9,75 +9,9 @@ const Photos = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
 
-  // Mock photos data
-  const photos = [
-    {
-      id: 1,
-      url: "/api/placeholder/300/200",
-      title: "Tomato Growth Progress",
-      description: "Week 4 - First flowers appearing",
-      client: "Sarah Johnson",
-      zone: "Vegetable Garden",
-      plant: "Tomatoes",
-      dateTaken: "2024-01-18",
-      tags: ["progress", "flowering"]
-    },
-    {
-      id: 2,
-      url: "/api/placeholder/300/200",
-      title: "Rose Pruning - Before",
-      description: "Before winter pruning session",
-      client: "Mike Chen",
-      zone: "Front Garden",
-      plant: "Roses",
-      dateTaken: "2024-01-15",
-      tags: ["before", "pruning"]
-    },
-    {
-      id: 3,
-      url: "/api/placeholder/300/200",
-      title: "New Herb Plantings",
-      description: "Fresh basil and oregano seedlings",
-      client: "Mike Chen",
-      zone: "Herb Patch",
-      plant: "Mixed Herbs",
-      dateTaken: "2024-01-12",
-      tags: ["new planting", "seedlings"]
-    },
-    {
-      id: 4,
-      url: "/api/placeholder/300/200",
-      title: "Pest Damage - Aphids",
-      description: "Aphid infestation on rose leaves",
-      client: "Emma Davis",
-      zone: "Border Beds",
-      plant: "Roses",
-      dateTaken: "2024-01-10",
-      tags: ["problem", "pests", "diagnosis"]
-    },
-    {
-      id: 5,
-      url: "/api/placeholder/300/200",
-      title: "Successful Harvest",
-      description: "First lettuce harvest of the season",
-      client: "Sarah Johnson",
-      zone: "Vegetable Garden",
-      plant: "Lettuce",
-      dateTaken: "2024-01-08",
-      tags: ["harvest", "success"]
-    },
-    {
-      id: 6,
-      url: "/api/placeholder/300/200",
-      title: "Soil Preparation",
-      description: "Preparing bed for spring planting",
-      client: "Emma Davis",
-      zone: "Shade Border",
-      plant: "N/A",
-      dateTaken: "2024-01-05",
-      tags: ["soil", "preparation"]
-    }
-  ];
+  // No seeded photos; will load user-specific photos from Supabase
+  const photos: any[] = [];
+
 
   const filteredPhotos = photos.filter(photo => {
     const matchesSearch = photo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
