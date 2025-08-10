@@ -2,23 +2,45 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, CheckSquare, Clock, AlertCircle } from "lucide-react";
+import { useClients } from "@/hooks/useClients";
+import { useTasks } from "@/hooks/useTasks";
+import { useZones } from "@/hooks/useZones";
+import { useVisits } from "@/hooks/useVisits";
+
 
 const Dashboard = () => {
-  // Mock data for today's visits and tasks
-  // No seeded visits; will load per-account data from Supabase later
-  const todaysVisits: any[] = [];
+  const { clients } = useClients();
+  const { tasks } = useTasks();
+  const { zones } = useZones();
+  const { visitsToday } = useVisits();
+
+  const todaysVisits = visitsToday.map((v) => ({
+    id: v.id,
+    clientName: v.client?.name || 'Unknown',
+    address: v.client?.address || '',
+    time: new Date(v.scheduled_date || v.created_at || new Date().toISOString()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    zones: v.zone ? [v.zone.name || ''] : [],
+    priority: (v.priority as 'high' | 'medium' | 'low') || 'medium',
+  }));
 
 
-  // No seeded tasks; per-account tasks coming from Supabase
-  const urgentTasks: any[] = [];
+  const urgentTasks = tasks
+    .filter((t) => t.status !== 'completed')
+    .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
+    .slice(0, 3)
+    .map((t) => ({
+      id: t.id,
+      task: t.title,
+      due: new Date(t.due_date).toLocaleDateString(),
+      client: t.client?.name || '—',
+    }));
 
 
-  // Zeroed stats until user-scoped data is loaded
   const stats = [
-    { label: "Today's Visits", value: "0", icon: Calendar },
-    { label: "Active Clients", value: "0", icon: Users },
-    { label: "Pending Tasks", value: "0", icon: CheckSquare },
-    { label: "Zones Managed", value: "0", icon: MapPin }
+    { label: "Today's Visits", value: String(todaysVisits.length), icon: Calendar },
+    { label: "Active Clients", value: String(clients.length), icon: Users },
+    { label: "Pending Tasks", value: String(tasks.filter(t => t.status !== 'completed').length), icon: CheckSquare },
+    { label: "Zones Managed", value: String(zones.length), icon: MapPin }
   ];
 
 
@@ -80,9 +102,11 @@ const Dashboard = () => {
                     <div className="flex items-center space-x-2">
                       <Clock className="w-3 h-3" />
                       <span className="text-sm">{visit.time}</span>
-                      <span className="text-sm text-muted-foreground">
-                        • {visit.zones.join(", ")}
-                      </span>
+                      {visit.zones?.length ? (
+                        <span className="text-sm text-muted-foreground">
+                          • {visit.zones.join(", ")}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                   <Button variant="outline" size="sm">
@@ -90,6 +114,11 @@ const Dashboard = () => {
                   </Button>
                 </div>
               ))}
+              {todaysVisits.length === 0 && (
+                <div className="text-center text-muted-foreground text-sm py-4">
+                  No visits scheduled for today.
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -118,6 +147,9 @@ const Dashboard = () => {
                   </Button>
                 </div>
               ))}
+              {urgentTasks.length === 0 && (
+                <div className="text-center text-muted-foreground text-sm py-2">No urgent tasks.</div>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -4,24 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Camera, Calendar, MapPin, User, Search, Plus, Download } from "lucide-react";
+import { usePhotos } from "@/hooks/usePhotos";
 
 const Photos = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
 
-  // No seeded photos; will load user-specific photos from Supabase
-  const photos: any[] = [];
+  const { photos, isLoading } = usePhotos();
 
 
-  const filteredPhotos = photos.filter(photo => {
-    const matchesSearch = photo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         photo.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         photo.zone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         photo.plant.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    if (filterType === "all") return matchesSearch;
-    return matchesSearch && photo.tags.includes(filterType);
+  const filteredPhotos = photos.filter((photo: any) => {
+    const term = searchTerm.toLowerCase();
+    const title = (photo?.title ?? '').toLowerCase();
+    const client = (photo?.client?.name ?? photo?.client ?? '').toLowerCase();
+    const zone = (photo?.zone?.name ?? photo?.zone ?? '').toLowerCase();
+    const plant = (photo?.plant ?? '').toLowerCase();
+
+    const matchesSearch = [title, client, zone, plant].some(v => v.includes(term));
+    if (filterType === 'all') return matchesSearch;
+    const tags = (photo?.tags ?? []) as string[];
+    return matchesSearch && tags.includes(filterType);
   });
+
 
   const getTagColor = (tag: string): "default" | "destructive" | "outline" | "secondary" => {
     const tagColors: { [key: string]: "default" | "destructive" | "outline" | "secondary" } = {
@@ -87,17 +91,26 @@ const Photos = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPhotos.map((photo) => (
           <Card key={photo.id} className="hover:shadow-lg transition-shadow overflow-hidden">
-            {/* Photo */}
             <div className="aspect-video bg-muted relative overflow-hidden">
-              <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-                <Camera className="w-12 h-12 text-green-400" />
-              </div>
+              {photo.url ? (
+                <img
+                  src={photo.url}
+                  alt={`Plant photo ${photo.title || ''}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                  <Camera className="w-12 h-12 text-green-400" />
+                </div>
+              )}
               <div className="absolute top-2 right-2">
                 <Badge variant="secondary" className="text-xs">
-                  {new Date(photo.dateTaken).toLocaleDateString()}
+                  {new Date((photo as any).date_taken ?? (photo as any).dateTaken ?? (photo as any).created_at ?? Date.now()).toLocaleDateString()}
                 </Badge>
               </div>
             </div>
+
 
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">{photo.title}</CardTitle>
@@ -110,11 +123,11 @@ const Photos = () => {
                 <div className="space-y-1 text-sm">
                   <div className="flex items-center">
                     <User className="w-3 h-3 mr-2 text-muted-foreground" />
-                    <span className="text-muted-foreground">{photo.client}</span>
+                    <span className="text-muted-foreground">{(photo as any).client?.name ?? (photo as any).client ?? ''}</span>
                   </div>
                   <div className="flex items-center">
                     <MapPin className="w-3 h-3 mr-2 text-muted-foreground" />
-                    <span className="text-muted-foreground">{photo.zone}</span>
+                    <span className="text-muted-foreground">{(photo as any).zone?.name ?? (photo as any).zone ?? ''}</span>
                   </div>
                   {photo.plant !== "N/A" && (
                     <div className="flex items-center">
@@ -124,14 +137,14 @@ const Photos = () => {
                   )}
                 </div>
 
-                {/* Tags */}
                 <div className="flex flex-wrap gap-1">
-                  {photo.tags.map((tag, index) => (
+                  {(photo.tags ?? []).map((tag: string, index: number) => (
                     <Badge key={index} variant={getTagColor(tag)} className="text-xs">
                       {tag}
                     </Badge>
                   ))}
                 </div>
+
 
                 {/* Actions */}
                 <div className="flex space-x-2 pt-2">
