@@ -10,9 +10,10 @@ const Navigation = () => {
           <div className="flex items-center space-x-3">
             <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <img 
-                src="/growloop-logo.png" 
-                alt="GrowLoop" 
+                src="/lovable-uploads/fb881d8d-d8ba-4f97-b3a8-afcaff7e1063.png" 
+                alt="GrowLoop logo - garden CRM" 
                 className="w-10 h-10 rounded-lg object-contain"
+                loading="lazy"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
