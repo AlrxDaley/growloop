@@ -146,10 +146,10 @@ const Zones = () => {
                           <Label className="text-sm">Section {i + 1} (suggested)</Label>
                           <Select
                             value={sectionNames[i]?.suggestion ?? ""}
-                            onValueChange={(v) =>
+onValueChange={(v) =>
                               setSectionNames(prev => {
                                 const next = [...prev];
-                                next[i] = { suggestion: v, custom: prev[i]?.custom ?? "" };
+                                next[i] = { suggestion: v === 'none' ? '' : v, custom: prev[i]?.custom ?? '' };
                                 return next;
                               })
                             }
@@ -161,7 +161,7 @@ const Zones = () => {
                               {suggestedNames.map((name) => (
                                 <SelectItem key={name} value={name}>{name}</SelectItem>
                               ))}
-                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="none">None</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
