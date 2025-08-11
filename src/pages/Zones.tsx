@@ -3,17 +3,74 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MapPin, Thermometer, Droplets, Sun, Search, Plus, User } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { MapPin, Droplets, Sun, Search, Plus, User } from "lucide-react";
 import { useZones } from "@/hooks/useZones";
+import { useClients } from "@/hooks/useClients";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "@/hooks/use-toast";
 
 const Zones = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { zones, isLoading } = useZones();
+  const { zones, isLoading, createZone } = useZones();
+  const { clients } = useClients();
+
+  const [open, setOpen] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [sectionCount, setSectionCount] = useState<number>(1);
+  const suggestedNames = ["Left Flower Bed", "Right Flower Bed", "Rear Flower Bed", "Front Flower Bed", "Potted Plants"];
+  const [sectionNames, setSectionNames] = useState<Array<{ suggestion: string; custom: string }>>(
+    [{ suggestion: suggestedNames[0], custom: "" }]
+  );
 
   const filteredZones = zones.filter(zone =>
     zone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     zone.client?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleSectionCountChange = (count: number) => {
+    setSectionCount(count);
+    setSectionNames(prev => {
+      const next = Array.from({ length: count }, (_, i) => ({
+        suggestion: suggestedNames[i] ?? "",
+        custom: prev[i]?.custom ?? ""
+      }));
+      return next;
+    });
+  };
+
+  const handleCreateZones = async () => {
+    if (!selectedClientId) {
+      toast({ title: "Select a client", description: "Please choose a client to link these zones.", variant: "destructive" });
+      return;
+    }
+    const names = sectionNames
+      .map(s => (s.custom?.trim() ? s.custom.trim() : s.suggestion?.trim()))
+      .filter((n): n is string => !!n && n.length > 0);
+
+    if (names.length === 0) {
+      toast({ title: "Add at least one name", description: "Please select or enter names for the sections.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      await Promise.all(
+        names.map(name =>
+          // @ts-ignore mutateAsync exists on the mutation object
+          (createZone as any).mutateAsync({ client_id: selectedClientId, name, plant_count: 0 })
+        )
+      );
+      setOpen(false);
+      // reset form
+      setSelectedClientId("");
+      handleSectionCountChange(1);
+      setSectionNames([{ suggestion: suggestedNames[0], custom: "" }]);
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message ?? "Failed to create zones.", variant: "destructive" });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -37,10 +94,108 @@ const Zones = () => {
           <h2 className="text-3xl font-serif font-bold text-foreground">Garden Zones</h2>
           <p className="text-muted-foreground">Track and manage garden zones across all clients</p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Zone
-        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Zone
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add zone(s)</DialogTitle>
+              <DialogDescription>Link zones to a client and name each garden section.</DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="client">Client</Label>
+                <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                  <SelectTrigger id="client">
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-popover">
+                    {clients?.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sections">Number of sections</Label>
+                <Select value={String(sectionCount)} onValueChange={(v) => handleSectionCountChange(parseInt(v))}>
+                  <SelectTrigger id="sections">
+                    <SelectValue placeholder="Select number of sections" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-popover">
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+                      <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Section names</Label>
+                <ScrollArea className="max-h-72 pr-3">
+                  <div className="space-y-4">
+                    {Array.from({ length: sectionCount }, (_, i) => (
+                      <div key={i} className="grid grid-cols-1 gap-2">
+                        <div>
+                          <Label className="text-sm">Section {i + 1} (suggested)</Label>
+                          <Select
+                            value={sectionNames[i]?.suggestion ?? ""}
+                            onValueChange={(v) =>
+                              setSectionNames(prev => {
+                                const next = [...prev];
+                                next[i] = { suggestion: v, custom: prev[i]?.custom ?? "" };
+                                return next;
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose a suggested name" />
+                            </SelectTrigger>
+                            <SelectContent className="z-50 bg-popover">
+                              {suggestedNames.map((name) => (
+                                <SelectItem key={name} value={name}>{name}</SelectItem>
+                              ))}
+                              <SelectItem value="">None</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-sm">Or custom name</Label>
+                          <Input
+                            placeholder="Enter a personalized name"
+                            value={sectionNames[i]?.custom ?? ""}
+                            onChange={(e) =>
+                              setSectionNames(prev => {
+                                const next = [...prev];
+                                next[i] = { suggestion: next[i]?.suggestion ?? "", custom: e.target.value };
+                                return next;
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                onClick={handleCreateZones}
+                disabled={!selectedClientId}
+              >
+                Create {sectionCount > 1 ? `${sectionCount} Zones` : "Zone"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search */}
