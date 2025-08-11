@@ -9,16 +9,10 @@ const Navigation = () => {
           {/* Logo */}
           <div className="flex items-center space-x-3">
             <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <img 
-                src="/lovable-uploads/fb881d8d-d8ba-4f97-b3a8-afcaff7e1063.png" 
-                alt="GrowLoop logo - garden CRM" 
-                className="w-10 h-10 rounded-lg object-contain"
-                loading="lazy"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
+              <img src="/lovable-uploads/fb881d8d-d8ba-4f97-b3a8-afcaff7e1063.png" alt="GrowLoop logo - garden CRM" className="w-10 h-10 rounded-lg object-contain" loading="lazy" onError={e => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+            }} />
               <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center hidden">
                 <Leaf className="w-6 h-6 text-primary-foreground" />
               </div>
@@ -44,9 +38,7 @@ const Navigation = () => {
                 Sign In
               </Button>
             </a>
-            <Button variant="garden" size="sm">
-              Try Free
-            </Button>
+            
           </div>
 
           {/* Mobile Menu Button */}
