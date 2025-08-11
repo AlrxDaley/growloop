@@ -9,7 +9,6 @@ import { useZones } from "@/hooks/useZones";
 import { useClients } from "@/hooks/useClients";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
 
 const Zones = () => {
@@ -31,9 +30,10 @@ const Zones = () => {
   );
 
   const handleSectionCountChange = (count: number) => {
-    setSectionCount(count);
+    const safe = Math.max(1, Math.min(10, count));
+    setSectionCount(safe);
     setSectionNames(prev => {
-      const next = Array.from({ length: count }, (_, i) => ({
+      const next = Array.from({ length: safe }, (_, i) => ({
         suggestion: suggestedNames[i] ?? "",
         custom: prev[i]?.custom ?? ""
       }));
@@ -101,7 +101,7 @@ const Zones = () => {
               Add Zone
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-lg w-full max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add zone(s)</DialogTitle>
               <DialogDescription>Link zones to a client and name each garden section.</DialogDescription>
@@ -111,7 +111,7 @@ const Zones = () => {
               <div className="space-y-2">
                 <Label htmlFor="client">Client</Label>
                 <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                  <SelectTrigger id="client">
+                  <SelectTrigger id="client" className="w-full">
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
                   <SelectContent className="z-50 bg-popover">
@@ -125,7 +125,7 @@ const Zones = () => {
               <div className="space-y-2">
                 <Label htmlFor="sections">Number of sections</Label>
                 <Select value={String(sectionCount)} onValueChange={(v) => handleSectionCountChange(parseInt(v))}>
-                  <SelectTrigger id="sections">
+                  <SelectTrigger id="sections" className="w-full">
                     <SelectValue placeholder="Select number of sections" />
                   </SelectTrigger>
                   <SelectContent className="z-50 bg-popover">
@@ -137,52 +137,50 @@ const Zones = () => {
               </div>
 
               <div className="space-y-3">
-                <Label>Section names</Label>
-                <ScrollArea className="max-h-72 pr-3">
-                  <div className="space-y-4">
-                    {Array.from({ length: sectionCount }, (_, i) => (
-                      <div key={i} className="grid grid-cols-1 gap-2">
-                        <div>
-                          <Label className="text-sm">Section {i + 1} (suggested)</Label>
-                          <Select
-                            value={sectionNames[i]?.suggestion ?? ""}
-onValueChange={(v) =>
-                              setSectionNames(prev => {
-                                const next = [...prev];
-                                next[i] = { suggestion: v === 'none' ? '' : v, custom: prev[i]?.custom ?? '' };
-                                return next;
-                              })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Choose a suggested name" />
-                            </SelectTrigger>
-                            <SelectContent className="z-50 bg-popover">
-                              {suggestedNames.map((name) => (
-                                <SelectItem key={name} value={name}>{name}</SelectItem>
-                              ))}
-                              <SelectItem value="none">None</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label className="text-sm">Or custom name</Label>
-                          <Input
-                            placeholder="Enter a personalized name"
-                            value={sectionNames[i]?.custom ?? ""}
-                            onChange={(e) =>
-                              setSectionNames(prev => {
-                                const next = [...prev];
-                                next[i] = { suggestion: next[i]?.suggestion ?? "", custom: e.target.value };
-                                return next;
-                              })
-                            }
-                          />
-                        </div>
+                <div className="space-y-4">
+                  {Array.from({ length: sectionCount }, (_, i) => (
+                    <div key={i} className="grid grid-cols-1 gap-2">
+                      <div>
+                        <Label className="text-sm">Section {i + 1} (suggested)</Label>
+                        <Select
+                          value={sectionNames[i]?.suggestion || undefined}
+                          onValueChange={(v) =>
+                            setSectionNames(prev => {
+                              const next = [...prev];
+                              next[i] = { suggestion: v === 'none' ? '' : v, custom: prev[i]?.custom ?? '' };
+                              return next;
+                            })
+                          }
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Choose a suggested name" />
+                          </SelectTrigger>
+                          <SelectContent className="z-50 bg-popover">
+                            {suggestedNames.map((name) => (
+                              <SelectItem key={name} value={name}>{name}</SelectItem>
+                            ))}
+                            <SelectItem value="none">None</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+                      <div>
+                        <Label className="text-sm">Or custom name</Label>
+                        <Input
+                          className="w-full"
+                          placeholder="Enter a personalized name"
+                          value={sectionNames[i]?.custom ?? ""}
+                          onChange={(e) =>
+                            setSectionNames(prev => {
+                              const next = [...prev];
+                              next[i] = { suggestion: next[i]?.suggestion ?? "", custom: e.target.value };
+                              return next;
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
