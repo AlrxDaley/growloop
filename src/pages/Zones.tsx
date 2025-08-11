@@ -9,6 +9,7 @@ import { useZones } from "@/hooks/useZones";
 import { useClients } from "@/hooks/useClients";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
 
 const Zones = () => {
@@ -85,6 +86,14 @@ const Zones = () => {
   const getSunlightIcon = (sunlight: string) => {
     return <Sun className="w-4 h-4 text-yellow-500" />;
   };
+
+  const groupedByClient = filteredZones.reduce((acc, z) => {
+    const key = z.client_id || 'unknown';
+    const clientName = z.client?.name || 'Unknown Client';
+    if (!acc[key]) acc[key] = { clientName, zones: [] as typeof filteredZones };
+    acc[key].zones.push(z);
+    return acc;
+  }, {} as Record<string, { clientName: string; zones: typeof filteredZones }>);
 
   return (
     <div className="space-y-6">
@@ -207,98 +216,115 @@ const Zones = () => {
         />
       </div>
 
-      {/* Zones Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredZones.map((zone) => (
-          <Card key={zone.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg flex items-center space-x-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span>{zone.name}</span>
-                  </CardTitle>
-                  <CardDescription className="flex items-center mt-1">
-                    <User className="w-3 h-3 mr-1" />
-                    {zone.client?.name}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Zone Stats */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Size</p>
-                    <p className="font-semibold">{zone.size}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Plants</p>
-                    <p className="font-semibold">{zone.plant_count}</p>
-                  </div>
-                </div>
-
-                {/* Conditions */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center">
-                      {getSunlightIcon(zone.sunlight)}
-                      <span className="ml-2 text-muted-foreground">{zone.sunlight || 'Unknown'}</span>
+      {/* Client Gardens */}
+      <div className="space-y-4">
+        <Accordion type="multiple" className="w-full space-y-4">
+          {Object.entries(groupedByClient).map(([clientId, group]) => (
+            <AccordionItem key={clientId} value={clientId}>
+              <Card className="overflow-hidden">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                  <div className="flex justify-between w-full items-center">
+                    <div className="text-left">
+                      <p className="text-lg font-semibold">{group.clientName} — Garden</p>
+                      <p className="text-sm text-muted-foreground">Click to view sections</p>
                     </div>
-                    <span className="text-muted-foreground">{zone.soil_type || 'Unknown'} soil</span>
+                    <Badge variant="secondary">{group.zones.length} sections</Badge>
                   </div>
-                  <div className="flex items-center text-sm">
-                    <Droplets className="w-4 h-4 text-blue-500 mr-2" />
-                    <span className="text-muted-foreground">Water: {zone.watering_schedule || 'No schedule'}</span>
-                  </div>
-                </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {group.zones.map((zone) => (
+                        <Card key={zone.id} className="hover:shadow-lg transition-shadow">
+                          <CardHeader>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <CardTitle className="text-lg flex items-center space-x-2">
+                                  <MapPin className="w-4 h-4 text-primary" />
+                                  <span>{zone.name}</span>
+                                </CardTitle>
+                                <CardDescription className="flex items-center mt-1">
+                                  <User className="w-3 h-3 mr-1" />
+                                  {group.clientName}
+                                </CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <p className="text-muted-foreground">Size</p>
+                                  <p className="font-semibold">{zone.size}</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Plants</p>
+                                  <p className="font-semibold">{zone.plant_count}</p>
+                                </div>
+                              </div>
 
-                {/* Plants */}
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Current Plants:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {zone.plants?.slice(0, 3).map((plant, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {plant.name}
-                      </Badge>
-                    ))}
-                    {zone.plants && zone.plants.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{zone.plants.length - 3} more
-                      </Badge>
-                    )}
-                    {(!zone.plants || zone.plants.length === 0) && (
-                      <span className="text-xs text-muted-foreground">No plants recorded</span>
-                    )}
-                  </div>
-                </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                  <div className="flex items-center">
+                                    {getSunlightIcon(zone.sunlight)}
+                                    <span className="ml-2 text-muted-foreground">{zone.sunlight || 'Unknown'}</span>
+                                  </div>
+                                  <span className="text-muted-foreground">{zone.soil_type || 'Unknown'} soil</span>
+                                </div>
+                                <div className="flex items-center text-sm">
+                                  <Droplets className="w-4 h-4 text-blue-500 mr-2" />
+                                  <span className="text-muted-foreground">Water: {zone.watering_schedule || 'No schedule'}</span>
+                                </div>
+                              </div>
 
-                {/* Notes */}
-                {zone.notes && (
-                  <p className="text-sm text-muted-foreground italic border-l-2 border-primary/20 pl-3">
-                    {zone.notes}
-                  </p>
-                )}
+                              <div>
+                                <p className="text-sm text-muted-foreground mb-2">Current Plants:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {zone.plants?.slice(0, 3).map((plant, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {plant.name}
+                                    </Badge>
+                                  ))}
+                                  {zone.plants && zone.plants.length > 3 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{zone.plants.length - 3} more
+                                    </Badge>
+                                  )}
+                                  {(!zone.plants || zone.plants.length === 0) && (
+                                    <span className="text-xs text-muted-foreground">No plants recorded</span>
+                                  )}
+                                </div>
+                              </div>
 
-                {/* Last Maintenance */}
-                <p className="text-xs text-muted-foreground">
-                  Created: {new Date(zone.created_at).toLocaleDateString()}
-                </p>
+                              {zone.notes && (
+                                <p className="text-sm text-muted-foreground italic border-l-2 border-primary/20 pl-3">
+                                  {zone.notes}
+                                </p>
+                              )}
 
-                {/* Actions */}
-                <div className="flex space-x-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    View Details
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    Edit
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                              <p className="text-xs text-muted-foreground">
+                                Created: {new Date(zone.created_at).toLocaleDateString()}
+                              </p>
+
+                              <div className="flex space-x-2 pt-2">
+                                <Button variant="outline" size="sm" className="flex-1">
+                                  View Details
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  Edit
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </AccordionContent>
+              </Card>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
 
       {filteredZones.length === 0 && (
