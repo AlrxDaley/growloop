@@ -282,7 +282,7 @@ const Clients = () => {
 
       {/* Clients Grid */}
       <div className="max-h-[70vh] overflow-y-auto pr-1">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
           {filteredClients.map((client) => (
             <Card key={client.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
