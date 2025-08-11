@@ -55,7 +55,46 @@ export function useClients() {
   const createClient = useMutation({
     mutationFn: async (newClient: Omit<Client, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       if (!user) throw new Error('User not authenticated');
-      
+
+      const name = (newClient as any).name?.trim() || '';
+      const address = (newClient as any).address?.trim() || '';
+      const email = (newClient as any).email?.trim() || '';
+      const phone = (newClient as any).phone?.trim() || '';
+
+      // 1) Duplicate by Name + Address (case-insensitive)
+      if (name && address) {
+        const { data: nameAddrDup, error: nameAddrErr } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('user_id', user.id)
+          .ilike('name', name)
+          .ilike('address', address)
+          .limit(1);
+        if (nameAddrErr) throw nameAddrErr;
+        if (nameAddrDup && nameAddrDup.length > 0) {
+          throw new Error('A client with the same name and address already exists.');
+        }
+      }
+
+      // 2) Duplicate by Email or Phone (case-insensitive)
+      if (email || phone) {
+        let query = supabase
+          .from('clients')
+          .select('id')
+          .eq('user_id', user.id);
+        const orParts: string[] = [];
+        if (email) orParts.push(`email.ilike.${email}`);
+        if (phone) orParts.push(`phone.ilike.${phone}`);
+        if (orParts.length) {
+          const { data: contactDup, error: contactErr } = await query.or(orParts.join(','))
+            .limit(1);
+          if (contactErr) throw contactErr;
+          if (contactDup && contactDup.length > 0) {
+            throw new Error('A client with the same email or phone already exists.');
+          }
+        }
+      }
+
       const { data, error } = await supabase
         .from('clients')
         .insert([{ ...newClient, user_id: user.id }])
