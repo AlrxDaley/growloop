@@ -337,6 +337,54 @@ export type Database = {
           },
         ]
       }
+      zone_plantmaterial: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          plantmaterial_id: number
+          quantity: number | null
+          updated_at: string
+          user_id: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          plantmaterial_id: number
+          quantity?: number | null
+          updated_at?: string
+          user_id: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          plantmaterial_id?: number
+          quantity?: number | null
+          updated_at?: string
+          user_id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_plantmaterial_plantmaterial_id_fkey"
+            columns: ["plantmaterial_id"]
+            isOneToOne: false
+            referencedRelation: "plantmaterial"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zone_plantmaterial_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zones: {
         Row: {
           client_id: string

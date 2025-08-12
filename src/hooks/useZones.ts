@@ -38,13 +38,23 @@ export function useZones() {
         .select(`
           *,
           client:clients(name),
-          plants:plants(id, name)
+          zone_plantmaterial:zone_plantmaterial(
+            plantmaterial:plantmaterial(id, common_name, scientific_name)
+          )
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      // Map joined plantmaterial into legacy `plants` shape used by UI
+      const mapped = (data as any[]).map((z: any) => ({
+        ...z,
+        plants: (z.zone_plantmaterial || []).map((zp: any) => ({
+          id: String(zp?.plantmaterial?.id ?? ''),
+          name: zp?.plantmaterial?.common_name || zp?.plantmaterial?.scientific_name || 'Unknown'
+        }))
+      }));
+      return mapped as any;
     },
     enabled: !!user,
   });

@@ -11,11 +11,17 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
+import { usePlantMaterial } from "@/hooks/usePlantMaterial";
+import { PlantMaterialMultiSelect } from "@/components/PlantMaterialMultiSelect";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Zones = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { zones, isLoading, createZone } = useZones();
   const { clients } = useClients();
+  const { user } = useAuth();
+  const { plantmaterial } = usePlantMaterial();
 
   const [open, setOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
@@ -24,6 +30,7 @@ const Zones = () => {
   const [sectionNames, setSectionNames] = useState<Array<{ suggestion: string; custom: string }>>(
     [{ suggestion: suggestedNames[0], custom: "" }]
   );
+  const [sectionPlants, setSectionPlants] = useState<number[][]>([[]]);
 
   const filteredZones = zones.filter(zone =>
     zone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,6 +45,10 @@ const Zones = () => {
         suggestion: suggestedNames[i] ?? "",
         custom: prev[i]?.custom ?? ""
       }));
+      return next;
+    });
+    setSectionPlants(prev => {
+      const next = Array.from({ length: safe }, (_, i) => prev[i] ?? []);
       return next;
     });
   };
@@ -58,16 +69,28 @@ const Zones = () => {
 
     try {
       await Promise.all(
-        names.map(name =>
+        names.map(async (name, idx) => {
           // @ts-ignore mutateAsync exists on the mutation object
-          (createZone as any).mutateAsync({ client_id: selectedClientId, name, plant_count: 0 })
-        )
+          const created = await (createZone as any).mutateAsync({ client_id: selectedClientId, name, plant_count: 0 });
+          const zoneId = created?.id as string;
+          const selectedIds = sectionPlants[idx] || [];
+          if (zoneId && selectedIds.length > 0 && user) {
+            const rows = selectedIds.map(pid => ({
+              user_id: user.id,
+              zone_id: zoneId,
+              plantmaterial_id: pid,
+            }));
+            const { error } = await supabase.from('zone_plantmaterial').insert(rows);
+            if (error) throw error;
+          }
+        })
       );
       setOpen(false);
       // reset form
       setSelectedClientId("");
       handleSectionCountChange(1);
       setSectionNames([{ suggestion: suggestedNames[0], custom: "" }]);
+      setSectionPlants([[]]);
     } catch (e: any) {
       toast({ title: "Error", description: e?.message ?? "Failed to create zones.", variant: "destructive" });
     }
@@ -94,6 +117,7 @@ const Zones = () => {
     acc[key].zones.push(z);
     return acc;
   }, {} as Record<string, { clientName: string; zones: typeof filteredZones }>);
+  const grouped = groupedByClient as Record<string, { clientName: string; zones: typeof filteredZones }>;
 
   return (
     <div className="space-y-6">
@@ -187,6 +211,19 @@ const Zones = () => {
                           }
                         />
                       </div>
+                      <div>
+                        <Label className="text-sm">Plants in this section</Label>
+                        <PlantMaterialMultiSelect
+                          options={plantmaterial.map(pm => ({ id: pm.id, label: pm.common_name || pm.scientific_name || `#${pm.id}` }))}
+                          value={sectionPlants[i] ?? []}
+                          onChange={(val) => setSectionPlants(prev => {
+                            const next = [...prev];
+                            next[i] = val;
+                            return next;
+                          })}
+                          placeholder="Type to search and select plants"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -219,7 +256,7 @@ const Zones = () => {
       {/* Client Gardens */}
       <div className="space-y-4">
         <Accordion type="multiple" className="w-full space-y-4">
-          {Object.entries(groupedByClient).map(([clientId, group]) => (
+          {Object.entries(grouped).map(([clientId, group]) => (
             <AccordionItem key={clientId} value={clientId}>
               <Card className="overflow-hidden">
                 <AccordionTrigger className="px-6 py-4 hover:no-underline">
