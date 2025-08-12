@@ -15,7 +15,7 @@ export function usePlantMaterial() {
       const { data, error } = await supabase
         .from('plantmaterial')
         .select('id, common_name, scientific_name, popularity_rank')
-        .order('popularity_rank', { ascending: true, nullsFirst: false })
+        .order('popularity_rank', { ascending: true })
         .order('common_name', { ascending: true });
 
       if (error) throw error;

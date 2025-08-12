@@ -39,7 +39,7 @@ export function useZones() {
           *,
           client:clients(name),
           zone_plantmaterial:zone_plantmaterial(
-            plantmaterial:plantmaterial(id, common_name, scientific_name)
+            plantmaterial:plantmaterial(*)
           )
         `)
         .eq('user_id', user.id)

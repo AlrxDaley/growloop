@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Zones = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { zones, isLoading, createZone } = useZones();
+  const { zones, isLoading, createZone, updateZone } = useZones();
   const { clients } = useClients();
   const { user } = useAuth();
   const { plantmaterial } = usePlantMaterial();
@@ -31,6 +31,10 @@ const Zones = () => {
     [{ suggestion: suggestedNames[0], custom: "" }]
   );
   const [sectionPlants, setSectionPlants] = useState<number[][]>([[]]);
+  const [viewZone, setViewZone] = useState<any | null>(null);
+  const [editZone, setEditZone] = useState<any | null>(null);
+  const [editName, setEditName] = useState<string>('');
+  const [editPlants, setEditPlants] = useState<number[]>([]);
 
   const filteredZones = zones.filter(zone =>
     zone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,6 +86,7 @@ const Zones = () => {
             }));
             const { error } = await supabase.from('zone_plantmaterial').insert(rows);
             if (error) throw error;
+            await (updateZone as any).mutateAsync({ id: zoneId, plant_count: selectedIds.length });
           }
         })
       );
@@ -93,6 +98,24 @@ const Zones = () => {
       setSectionPlants([[]]);
     } catch (e: any) {
       toast({ title: "Error", description: e?.message ?? "Failed to create zones.", variant: "destructive" });
+    }
+  };
+  const handleSaveEdit = async () => {
+    if (!editZone) return;
+    try {
+      // Replace plant links
+      await supabase.from('zone_plantmaterial').delete().eq('zone_id', editZone.id);
+      if (user && editPlants.length > 0) {
+        const rows = editPlants.map(pid => ({ user_id: user.id, zone_id: editZone.id, plantmaterial_id: pid }));
+        const { error } = await supabase.from('zone_plantmaterial').insert(rows);
+        if (error) throw error;
+      }
+      // Update zone attributes and trigger refetch via mutation
+      await (updateZone as any).mutateAsync({ id: editZone.id, name: editName || editZone.name, plant_count: editPlants.length });
+      toast({ title: 'Updated', description: 'Zone updated successfully' });
+      setEditZone(null);
+    } catch (e: any) {
+      toast({ title: 'Error', description: e?.message || 'Failed to update zone', variant: 'destructive' });
     }
   };
 
@@ -344,10 +367,19 @@ const Zones = () => {
                               </p>
 
                               <div className="flex space-x-2 pt-2">
-                                <Button variant="outline" size="sm" className="flex-1">
+                                <Button variant="outline" size="sm" className="flex-1" onClick={() => setViewZone(zone)}>
                                   View Details
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditZone(zone);
+                                    setEditName(zone.name);
+                                    const ids = (zone as any)?.zone_plantmaterial?.map((zp: any) => zp?.plantmaterial?.id).filter((id: any) => typeof id === 'number') || [];
+                                    setEditPlants(ids);
+                                  }}
+                                >
                                   Edit
                                 </Button>
                               </div>
@@ -363,6 +395,97 @@ const Zones = () => {
           ))}
         </Accordion>
       </div>
+
+      <Dialog open={!!viewZone} onOpenChange={(o) => { if (!o) setViewZone(null); }}>
+        <DialogContent className="sm:max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Zone details</DialogTitle>
+            <DialogDescription>Details for {viewZone?.name}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Client</p>
+                <p className="font-semibold">{viewZone?.client?.name || 'Unknown'}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Size</p>
+                <p className="font-semibold">{viewZone?.size || '-'}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Sunlight</p>
+                <p className="font-semibold">{viewZone?.sunlight || '-'}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Soil</p>
+                <p className="font-semibold">{viewZone?.soil_type || '-'}</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Plants</p>
+              {!viewZone?.zone_plantmaterial?.length && (
+                <p className="text-sm text-muted-foreground">No plants recorded</p>
+              )}
+              <div className="space-y-3">
+                {viewZone?.zone_plantmaterial?.map((zp: any, idx: number) => {
+                  const pm = zp?.plantmaterial || {};
+                  return (
+                    <div key={idx} className="rounded-md border p-3">
+                      <p className="font-medium">
+                        {pm.common_name || pm.scientific_name || `#${pm.id}`}
+                        {pm.scientific_name && pm.common_name && (
+                          <span className="text-muted-foreground"> — <i>{pm.scientific_name}</i></span>
+                        )}
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 text-sm">
+                        {pm.category && (<div><span className="text-muted-foreground">Category:</span> <span className="font-medium">{pm.category}</span></div>)}
+                        {pm.soil && (<div><span className="text-muted-foreground">Soil:</span> <span className="font-medium">{pm.soil}</span></div>)}
+                        {pm.watering && (<div><span className="text-muted-foreground">Watering:</span> <span className="font-medium">{pm.watering}</span></div>)}
+                        {pm.fertiliser && (<div><span className="text-muted-foreground">Fertiliser:</span> <span className="font-medium">{pm.fertiliser}</span></div>)}
+                        {pm.pruning && (<div><span className="text-muted-foreground">Pruning:</span> <span className="font-medium">{pm.pruning}</span></div>)}
+                        {pm.propagation && (<div><span className="text-muted-foreground">Propagation:</span> <span className="font-medium">{pm.propagation}</span></div>)}
+                        {pm.flowering_period && (<div><span className="text-muted-foreground">Flowering:</span> <span className="font-medium">{pm.flowering_period}</span></div>)}
+                        {pm.planting_time && (<div><span className="text-muted-foreground">Planting Time:</span> <span className="font-medium">{pm.planting_time}</span></div>)}
+                        {pm.pests_diseases && (<div className="sm:col-span-2"><span className="text-muted-foreground">Pests/Diseases:</span> <span className="font-medium">{pm.pests_diseases}</span></div>)}
+                        {pm.position && (<div className="sm:col-span-2"><span className="text-muted-foreground">Position:</span> <span className="font-medium">{pm.position}</span></div>)}
+                        {pm.notes && (<div className="sm:col-span-2"><span className="text-muted-foreground">Notes:</span> <span className="font-medium">{pm.notes}</span></div>)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editZone} onOpenChange={(o) => { if (!o) setEditZone(null); }}>
+        <DialogContent className="sm:max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>Edit zone</DialogTitle>
+            <DialogDescription>Update the name and plants for this zone.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm">Name</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-sm">Plants in this section</Label>
+              <PlantMaterialMultiSelect
+                options={plantmaterial.map(pm => ({ id: pm.id, label: pm.common_name || pm.scientific_name || `#${pm.id}` }))}
+                value={editPlants}
+                onChange={setEditPlants}
+                placeholder="Type to search and select plants"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditZone(null)}>Cancel</Button>
+            <Button onClick={handleSaveEdit}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {filteredZones.length === 0 && (
         <div className="text-center py-12">
