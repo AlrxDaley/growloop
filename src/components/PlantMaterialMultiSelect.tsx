@@ -42,7 +42,7 @@ export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, on
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover z-[1000]">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover z-[1000] max-h-[75vh] overflow-hidden">
         {isLoading ? (
           <div className="p-3 text-sm text-muted-foreground">Loading plants...</div>
         ) : options.length === 0 ? (
@@ -50,20 +50,22 @@ export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, on
         ) : (
           <Command>
             <CommandInput placeholder="Type to search..." />
-            <CommandList className="max-h-64 overflow-auto">
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup>
-                {options.map((opt) => {
-                  const active = value.includes(opt.id);
-                  return (
-                    <CommandItem key={opt.id} value={opt.label} onSelect={() => toggle(opt.id)} className="cursor-pointer">
-                      <Check className={cn('mr-2 h-4 w-4', active ? 'opacity-100' : 'opacity-0')} />
-                      {opt.label}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </CommandList>
+            <div className="max-h-72 overflow-y-auto overscroll-contain touch-pan-y">
+              <CommandList>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup>
+                  {options.map((opt) => {
+                    const active = value.includes(opt.id);
+                    return (
+                      <CommandItem key={opt.id} value={opt.label} onSelect={() => toggle(opt.id)} className="cursor-pointer">
+                        <Check className={cn('mr-2 h-4 w-4', active ? 'opacity-100' : 'opacity-0')} />
+                        {opt.label}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </div>
           </Command>
         )}
       </PopoverContent>

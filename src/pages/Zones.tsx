@@ -475,6 +475,7 @@ const Zones = () => {
               <Label className="text-sm">Plants in this section</Label>
               <PlantMaterialMultiSelect
                 options={plantmaterial.map(pm => ({ id: pm.id, label: pm.common_name || pm.scientific_name || `#${pm.id}` }))}
+                isLoading={pmLoading}
                 value={editPlants}
                 onChange={setEditPlants}
                 placeholder="Type to search and select plants"
