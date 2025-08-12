@@ -120,6 +120,60 @@ export type Database = {
           },
         ]
       }
+      plantmaterial: {
+        Row: {
+          category: string | null
+          common_name: string | null
+          fertiliser: string | null
+          flowering_period: string | null
+          id: number
+          notes: string | null
+          pests_diseases: string | null
+          planting_time: string | null
+          popularity_rank: number | null
+          position: string | null
+          propagation: string | null
+          pruning: string | null
+          scientific_name: string | null
+          soil: string | null
+          watering: string | null
+        }
+        Insert: {
+          category?: string | null
+          common_name?: string | null
+          fertiliser?: string | null
+          flowering_period?: string | null
+          id?: number
+          notes?: string | null
+          pests_diseases?: string | null
+          planting_time?: string | null
+          popularity_rank?: number | null
+          position?: string | null
+          propagation?: string | null
+          pruning?: string | null
+          scientific_name?: string | null
+          soil?: string | null
+          watering?: string | null
+        }
+        Update: {
+          category?: string | null
+          common_name?: string | null
+          fertiliser?: string | null
+          flowering_period?: string | null
+          id?: number
+          notes?: string | null
+          pests_diseases?: string | null
+          planting_time?: string | null
+          popularity_rank?: number | null
+          position?: string | null
+          propagation?: string | null
+          pruning?: string | null
+          scientific_name?: string | null
+          soil?: string | null
+          watering?: string | null
+        }
+        Relationships: []
+      }
       plants: {
         Row: {
           created_at: string
