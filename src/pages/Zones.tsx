@@ -21,7 +21,7 @@ const Zones = () => {
   const { zones, isLoading, createZone, updateZone } = useZones();
   const { clients } = useClients();
   const { user } = useAuth();
-  const { plantmaterial } = usePlantMaterial();
+  const { plantmaterial, isLoading: pmLoading } = usePlantMaterial();
 
   const [open, setOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
@@ -238,6 +238,7 @@ const Zones = () => {
                         <Label className="text-sm">Plants in this section</Label>
                         <PlantMaterialMultiSelect
                           options={plantmaterial.map(pm => ({ id: pm.id, label: pm.common_name || pm.scientific_name || `#${pm.id}` }))}
+                          isLoading={pmLoading}
                           value={sectionPlants[i] ?? []}
                           onChange={(val) => setSectionPlants(prev => {
                             const next = [...prev];

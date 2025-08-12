@@ -13,12 +13,13 @@ export interface MultiOption {
 
 interface PlantMaterialMultiSelectProps {
   options: MultiOption[];
+  isLoading?: boolean;
   value: number[];
   onChange: (val: number[]) => void;
   placeholder?: string;
 }
 
-export const PlantMaterialMultiSelect = ({ options, value, onChange, placeholder = 'Select plants' }: PlantMaterialMultiSelectProps) => {
+export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, onChange, placeholder = 'Select plants' }: PlantMaterialMultiSelectProps) => {
   const [open, setOpen] = useState(false);
 
   const toggle = (id: number) => {
@@ -42,7 +43,9 @@ export const PlantMaterialMultiSelect = ({ options, value, onChange, placeholder
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover z-[1000]">
-        {options.length === 0 ? (
+        {isLoading ? (
+          <div className="p-3 text-sm text-muted-foreground">Loading plants...</div>
+        ) : options.length === 0 ? (
           <div className="p-3 text-sm text-muted-foreground">No plants available</div>
         ) : (
           <Command>
