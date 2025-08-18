@@ -250,6 +250,23 @@ export const ZoneForm: React.FC<ZoneFormProps> = ({
             </div>
           </div>
 
+          {/* Plant Materials */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Plant Materials</h3>
+            <div>
+              <Label htmlFor="selected_plants">Select Plants</Label>
+              <MaterialsMultiSelectDropdown
+                values={watch('selected_plants') || []}
+                onChange={(values) => setValue('selected_plants', values)}
+                placeholder="Select plant materials for this zone..."
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Choose from the plant materials catalog
+              </p>
+            </div>
+          </div>
+
           {/* Sun Exposure */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Sun Exposure</h3>
@@ -343,22 +360,6 @@ export const ZoneForm: React.FC<ZoneFormProps> = ({
             </div>
           </div>
 
-          {/* Plant Materials */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Plant Materials</h3>
-            <div>
-              <Label htmlFor="selected_plants">Select Plants</Label>
-              <MaterialsMultiSelectDropdown
-                values={watch('selected_plants') || []}
-                onChange={(values) => setValue('selected_plants', values)}
-                placeholder="Select plant materials for this zone..."
-                className="w-full"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Choose from the plant materials catalog
-              </p>
-            </div>
-          </div>
 
           {/* General Notes */}
           <div>

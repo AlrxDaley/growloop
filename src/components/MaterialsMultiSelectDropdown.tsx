@@ -160,6 +160,7 @@ export const MaterialsMultiSelectDropdown: React.FC<MaterialsMultiSelectDropdown
     >
       {/* Control */}
       <Button
+        type="button"
         variant="outline"
         className={cn(
           "w-full justify-between text-left font-normal rounded-lg h-auto min-h-10 px-3 py-2",
@@ -243,6 +244,7 @@ export const MaterialsMultiSelectDropdown: React.FC<MaterialsMultiSelectDropdown
           {materials.length <= 50 && (
             <div className="p-2 border-b flex gap-2">
               <Button 
+                type="button"
                 variant="ghost" 
                 size="sm" 
                 onClick={selectAll}
@@ -253,6 +255,7 @@ export const MaterialsMultiSelectDropdown: React.FC<MaterialsMultiSelectDropdown
                 Select All
               </Button>
               <Button 
+                type="button"
                 variant="ghost" 
                 size="sm" 
                 onClick={deselectAll}
