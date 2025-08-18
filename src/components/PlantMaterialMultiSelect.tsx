@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -50,7 +51,7 @@ export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, on
         ) : (
           <Command>
             <CommandInput placeholder="Type to search..." />
-            <div className="max-h-72 overflow-y-auto overscroll-contain touch-pan-y">
+            <ScrollArea className="max-h-72">
               <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
@@ -65,7 +66,7 @@ export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, on
                   })}
                 </CommandGroup>
               </CommandList>
-            </div>
+            </ScrollArea>
           </Command>
         )}
       </PopoverContent>
