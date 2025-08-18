@@ -76,7 +76,7 @@ export const PlantMaterialMultiSelect = ({ value, onChange, placeholder = 'Selec
                 {searchTerm ? 'No plants found matching your search.' : 'No plants available.'}
               </div>
             ) : (
-              <div className="p-1">
+              <div className="p-1 overflow-y-auto max-h-full">{/* Make scrollable */}
                 {filteredPlants.map((plant) => {
                   const isSelected = value.includes(plant.id);
                   const displayName = plant.common_name || plant.scientific_name || 'Unknown Plant';
