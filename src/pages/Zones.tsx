@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, Plus } from "lucide-react";
 import { useZones } from "@/hooks/useZones";
@@ -139,19 +140,21 @@ export default function Zones() {
           </p>
         </div>
       ) : (
-        <div className="space-y-8">
+        <Accordion type="multiple" defaultValue={sortedClientNames} className="space-y-4">
           {sortedClientNames.map((clientName) => (
-            <Card key={clientName} className="rounded-xl">
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {clientName} 
-                  <span className="text-sm font-normal text-muted-foreground ml-2">
-                    ({groupedZones[clientName].length} zone{groupedZones[clientName].length !== 1 ? 's' : ''})
+            <AccordionItem key={clientName} value={clientName} className="border border-border rounded-xl">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline rounded-t-xl hover:bg-muted/50">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-left">
+                    {clientName}
+                  </h3>
+                  <span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                    {groupedZones[clientName].length} zone{groupedZones[clientName].length !== 1 ? 's' : ''}
                   </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
                   {groupedZones[clientName].map((zone) => (
                     <ZoneCard
                       key={zone.id}
@@ -162,10 +165,10 @@ export default function Zones() {
                     />
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       )}
 
       {/* Edit Dialog */}
