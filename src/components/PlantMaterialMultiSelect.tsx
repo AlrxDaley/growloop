@@ -2,75 +2,105 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-export interface MultiOption {
-  id: number;
-  label: string;
-}
+import { usePlantMaterial } from '@/hooks/usePlantMaterial';
 
 interface PlantMaterialMultiSelectProps {
-  options: MultiOption[];
-  isLoading?: boolean;
   value: number[];
   onChange: (val: number[]) => void;
   placeholder?: string;
 }
 
-export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, onChange, placeholder = 'Select plants' }: PlantMaterialMultiSelectProps) => {
+export const PlantMaterialMultiSelect = ({ value, onChange, placeholder = 'Select plants' }: PlantMaterialMultiSelectProps) => {
   const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { plantmaterial, isLoading } = usePlantMaterial();
 
   const toggle = (id: number) => {
-    if (value.includes(id)) onChange(value.filter(v => v !== id));
-    else onChange([...value, id]);
+    if (value.includes(id)) {
+      onChange(value.filter(v => v !== id));
+    } else {
+      onChange([...value, id]);
+    }
   };
 
-  const selected = options.filter(o => value.includes(o.id));
+  // Filter and sort plants alphabetically
+  const filteredPlants = plantmaterial
+    .filter(plant => {
+      const displayName = plant.common_name || plant.scientific_name || '';
+      return displayName.toLowerCase().includes(searchTerm.toLowerCase());
+    })
+    .sort((a, b) => {
+      const nameA = a.common_name || a.scientific_name || '';
+      const nameB = b.common_name || b.scientific_name || '';
+      return nameA.localeCompare(nameB);
+    });
+
+  const selectedPlants = plantmaterial.filter(plant => value.includes(plant.id));
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
           <div className="flex flex-wrap gap-1 items-center">
-            {selected.length === 0 && <span className="text-muted-foreground">{placeholder}</span>}
-            {selected.map((s) => (
-              <Badge key={s.id} variant="secondary" className="text-xs">{s.label}</Badge>
+            {selectedPlants.length === 0 && <span className="text-muted-foreground">{placeholder}</span>}
+            {selectedPlants.map((plant) => (
+              <Badge key={plant.id} variant="secondary" className="text-xs">
+                {plant.common_name || plant.scientific_name}
+              </Badge>
             ))}
           </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover z-[1000] max-h-[75vh] overflow-hidden">
-        {isLoading ? (
-          <div className="p-3 text-sm text-muted-foreground">Loading plants...</div>
-        ) : options.length === 0 ? (
-          <div className="p-3 text-sm text-muted-foreground">No plants available</div>
-        ) : (
-          <Command className="overflow-hidden">
-            <div className="px-3 py-2 border-b">
-              <CommandInput placeholder="Type to search..." className="border-0 p-0 focus:ring-0" />
-            </div>
-            <ScrollArea className="max-h-72" type="auto">{/* Enable auto scrollbars */}
-              <CommandList className="max-h-none">
-                <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup>
-                  {options.map((opt) => {
-                    const active = value.includes(opt.id);
-                    return (
-                      <CommandItem key={opt.id} value={opt.label} onSelect={() => toggle(opt.id)} className="cursor-pointer">
-                        <Check className={cn('mr-2 h-4 w-4', active ? 'opacity-100' : 'opacity-0')} />
-                        {opt.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </ScrollArea>
-          </Command>
-        )}
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 z-[1000]">
+        <div className="flex flex-col h-80">
+          {/* Search bar - fixed at top */}
+          <div className="p-3 border-b bg-background">
+            <Input
+              placeholder="Search plants..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          
+          {/* Scrollable plant list */}
+          <div className="flex-1 overflow-auto">
+            {isLoading ? (
+              <div className="p-3 text-sm text-muted-foreground">Loading plants...</div>
+            ) : filteredPlants.length === 0 ? (
+              <div className="p-3 text-sm text-muted-foreground">
+                {searchTerm ? 'No plants found matching your search.' : 'No plants available.'}
+              </div>
+            ) : (
+              <div className="p-1">
+                {filteredPlants.map((plant) => {
+                  const isSelected = value.includes(plant.id);
+                  const displayName = plant.common_name || plant.scientific_name || 'Unknown Plant';
+                  
+                  return (
+                    <div
+                      key={plant.id}
+                      onClick={() => toggle(plant.id)}
+                      className="flex items-center space-x-2 px-2 py-2 hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
+                    >
+                      <Check className={cn('h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{displayName}</div>
+                        {plant.common_name && plant.scientific_name && plant.common_name !== plant.scientific_name && (
+                          <div className="text-xs text-muted-foreground italic">{plant.scientific_name}</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );
