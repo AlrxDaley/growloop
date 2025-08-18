@@ -53,7 +53,7 @@ export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, on
             <div className="px-3 py-2 border-b">
               <CommandInput placeholder="Type to search..." className="border-0 p-0 focus:ring-0" />
             </div>
-            <ScrollArea className="max-h-72">
+            <ScrollArea className="max-h-72" type="auto">{/* Enable auto scrollbars */}
               <CommandList className="max-h-none">
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
