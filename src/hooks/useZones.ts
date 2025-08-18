@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { usePlantMaterial } from '@/hooks/usePlantMaterial';
 
 export interface Zone {
   id: string;
@@ -33,6 +34,7 @@ export interface Zone {
 export function useZones() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { plantmaterial } = usePlantMaterial();
 
   const {
     data: zones = [],
@@ -70,16 +72,46 @@ export function useZones() {
   });
 
   const createZone = useMutation({
-    mutationFn: async (newZone: Omit<Zone, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'client' | 'plants'>) => {
+    mutationFn: async (newZone: Omit<Zone, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'client' | 'plants'> & { selected_plants?: string[] }) => {
       if (!user) throw new Error('User not authenticated');
+      
+      const { selected_plants, ...zoneData } = newZone;
       
       const { data, error } = await supabase
         .from('zones')
-        .insert([{ ...newZone, user_id: user.id }])
+        .insert([{ ...zoneData, user_id: user.id }])
         .select()
         .single();
 
       if (error) throw error;
+      
+      // If plants were selected, add them to the zone_plantmaterial table
+      if (selected_plants && selected_plants.length > 0) {
+        const plantInserts = selected_plants.map(plantName => {
+          // Find the plant material by name
+          const plantMaterial = plantmaterial.find(pm => 
+            pm.common_name === plantName || pm.scientific_name === plantName
+          );
+          
+          if (plantMaterial) {
+            return {
+              zone_id: data.id,
+              plantmaterial_id: plantMaterial.id,
+              user_id: user.id
+            };
+          }
+          return null;
+        }).filter(Boolean);
+
+        if (plantInserts.length > 0) {
+          const { error: plantError } = await supabase
+            .from('zone_plantmaterial')
+            .insert(plantInserts);
+          
+          if (plantError) throw plantError;
+        }
+      }
+      
       return data;
     },
     onSuccess: () => {
@@ -99,7 +131,8 @@ export function useZones() {
   });
 
   const updateZone = useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<Zone> & { id: string }) => {
+    mutationFn: async ({ id, selected_plants, ...updates }: Partial<Zone> & { id: string; selected_plants?: string[] }) => {
+      // Update the zone data
       const { data, error } = await supabase
         .from('zones')
         .update(updates)
@@ -108,6 +141,45 @@ export function useZones() {
         .single();
 
       if (error) throw error;
+      
+      // Handle plant updates if provided
+      if (selected_plants !== undefined) {
+        // First, remove existing plant associations
+        const { error: deleteError } = await supabase
+          .from('zone_plantmaterial')
+          .delete()
+          .eq('zone_id', id);
+        
+        if (deleteError) throw deleteError;
+        
+        // Then add new plant associations
+        if (selected_plants.length > 0) {
+          const plantInserts = selected_plants.map(plantName => {
+            // Find the plant material by name
+            const plantMaterial = plantmaterial.find(pm => 
+              pm.common_name === plantName || pm.scientific_name === plantName
+            );
+            
+            if (plantMaterial) {
+              return {
+                zone_id: id,
+                plantmaterial_id: plantMaterial.id,
+                user_id: user?.id
+              };
+            }
+            return null;
+          }).filter(Boolean);
+
+          if (plantInserts.length > 0) {
+            const { error: plantError } = await supabase
+              .from('zone_plantmaterial')
+              .insert(plantInserts);
+            
+            if (plantError) throw plantError;
+          }
+        }
+      }
+      
       return data;
     },
     onSuccess: () => {
