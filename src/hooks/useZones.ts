@@ -16,6 +16,16 @@ export interface Zone {
   notes?: string;
   created_at: string;
   updated_at: string;
+  // New enhanced fields
+  soil_type_enum?: 'Clay' | 'Loam' | 'Sand' | 'Silt' | 'Chalk' | 'Peat' | 'Other';
+  soil_type_other?: string;
+  area_size_value?: number;
+  area_size_unit?: 'm²' | 'ft²' | 'acre';
+  sun_primary?: 'Full sun (6+ h)' | 'Partial sun (3–6 h)' | 'Partial shade (3–6 h filtered)' | 'Dappled shade' | 'Full shade (<3 h)';
+  sun_modifiers?: string[];
+  sun_hours_estimate?: number;
+  sun_notes?: string;
+  last_watered_at?: string;
   client?: { name: string };
   plants?: { id: string; name: string }[];
 }

@@ -16,6 +16,7 @@ export interface Task {
   recurring: boolean;
   estimated_time_minutes?: number;
   completed_at?: string;
+  task_type?: string;
   created_at: string;
   updated_at: string;
   client?: { name: string };
@@ -125,6 +126,7 @@ export function useTasks() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['zones'] });
       toast({
         title: "Success",
         description: "Task completed successfully",
