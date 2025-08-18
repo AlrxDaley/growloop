@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Edit, MapPin, Sun, Droplets, Plus } from 'lucide-react';
+import { ArrowLeft, Edit, MapPin, Sun, Droplets } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,8 +19,6 @@ export default function ZoneDetails() {
   const { clients } = useClients();
   const { plantmaterial } = usePlantMaterial();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isAddPlantDialogOpen, setIsAddPlantDialogOpen] = useState(false);
-  const [selectedPlantNames, setSelectedPlantNames] = useState<string[]>([]);
 
   const zone = zones.find(z => z.id === id);
 
@@ -73,12 +71,6 @@ export default function ZoneDetails() {
     });
   };
 
-  const handleAddPlant = () => {
-    // This would typically update the zone_plantmaterial table
-    // For now, we'll just close the dialog and reset selection
-    setIsAddPlantDialogOpen(false);
-    setSelectedPlantNames([]);
-  };
 
   return (
     <div className="space-y-6">
@@ -189,67 +181,48 @@ export default function ZoneDetails() {
         {/* Plants in Zone */}
         <Card className="rounded-xl">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Sun className="w-5 h-5" />
-                Plants in this Zone
-              </CardTitle>
-              <Dialog open={isAddPlantDialogOpen} onOpenChange={setIsAddPlantDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" variant="outline" className="rounded-lg">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Plant
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Add Plants to Zone</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground">
-                      Select plant materials to add to this zone. This feature is coming soon!
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsAddPlantDialogOpen(false)}
-                        className="rounded-lg"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={handleAddPlant}
-                        className="rounded-lg"
-                        disabled
-                      >
-                        Add Plants
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <Sun className="w-5 h-5" />
+              Plants in this Zone
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {zone.plants && zone.plants.length > 0 ? (
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {zone.plants.map((plant) => (
-                  <div
-                    key={plant.id}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium text-sm">{plant.name}</p>
+                {zone.plants.map((plant) => {
+                  // Find the full plant material data for richer display
+                  const plantMaterial = plantmaterial.find(pm => 
+                    pm.common_name === plant.name || pm.scientific_name === plant.name
+                  );
+                  
+                  return (
+                    <div
+                      key={plant.id}
+                      className="flex items-start justify-between p-4 bg-muted/50 rounded-lg border"
+                    >
+                      <div className="space-y-1">
+                        <p className="font-medium text-sm">{plant.name}</p>
+                        {plantMaterial && (
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            {plantMaterial.scientific_name && plantMaterial.scientific_name !== plant.name && (
+                              <p className="italic">Scientific: {plantMaterial.scientific_name}</p>
+                            )}
+                            {plantMaterial.common_name && plantMaterial.common_name !== plant.name && (
+                              <p>Common: {plantMaterial.common_name}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-8">
                 <Sun className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground text-sm">No plants in this zone yet.</p>
                 <p className="text-muted-foreground text-xs mt-1">
-                  Click "Add Plant" to start planting!
+                  Edit the zone to add plants.
                 </p>
               </div>
             )}
