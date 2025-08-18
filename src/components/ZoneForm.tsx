@@ -144,7 +144,6 @@ export const ZoneForm: React.FC<ZoneFormProps> = ({
                   <SelectValue placeholder="Assign a client (optional)" />
                 </SelectTrigger>
                 <SelectContent className="rounded-lg max-h-60 overflow-y-auto">
-                  <SelectItem value="">Unassigned</SelectItem>
                   {clients.map((client) => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.name}
