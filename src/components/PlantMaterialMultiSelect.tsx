@@ -49,10 +49,12 @@ export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, on
         ) : options.length === 0 ? (
           <div className="p-3 text-sm text-muted-foreground">No plants available</div>
         ) : (
-          <Command>
-            <CommandInput placeholder="Type to search..." className="border-b" />
+          <Command className="overflow-hidden">
+            <div className="px-3 py-2 border-b">
+              <CommandInput placeholder="Type to search..." className="border-0 p-0 focus:ring-0" />
+            </div>
             <ScrollArea className="max-h-72">
-              <CommandList>
+              <CommandList className="max-h-none">
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
                   {options.map((opt) => {
