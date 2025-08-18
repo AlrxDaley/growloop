@@ -50,7 +50,7 @@ export const PlantMaterialMultiSelect = ({ options, isLoading = false, value, on
           <div className="p-3 text-sm text-muted-foreground">No plants available</div>
         ) : (
           <Command>
-            <CommandInput placeholder="Type to search..." />
+            <CommandInput placeholder="Type to search..." className="border-b" />
             <ScrollArea className="max-h-72">
               <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
