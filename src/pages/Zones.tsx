@@ -12,7 +12,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { toast } from "@/hooks/use-toast";
 import { usePlantMaterial } from "@/hooks/usePlantMaterial";
-import { PlantMaterialMultiSelect } from "@/components/PlantMaterialMultiSelect";
+import { MaterialsMultiSelectDropdown } from "@/components/MaterialsMultiSelectDropdown";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,11 +30,11 @@ const Zones = () => {
   const [sectionNames, setSectionNames] = useState<Array<{ suggestion: string; custom: string }>>(
     [{ suggestion: suggestedNames[0], custom: "" }]
   );
-  const [sectionPlants, setSectionPlants] = useState<number[][]>([[]]);
+  const [sectionPlants, setSectionPlants] = useState<string[][]>([[]]);
   const [viewZone, setViewZone] = useState<any | null>(null);
   const [editZone, setEditZone] = useState<any | null>(null);
   const [editName, setEditName] = useState<string>('');
-  const [editPlants, setEditPlants] = useState<number[]>([]);
+  const [editPlants, setEditPlants] = useState<string[]>([]);
 
   const filteredZones = zones.filter(zone =>
     zone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -77,16 +77,26 @@ const Zones = () => {
           // @ts-ignore mutateAsync exists on the mutation object
           const created = await (createZone as any).mutateAsync({ client_id: selectedClientId, name, plant_count: 0 });
           const zoneId = created?.id as string;
-          const selectedIds = sectionPlants[idx] || [];
-          if (zoneId && selectedIds.length > 0 && user) {
-            const rows = selectedIds.map(pid => ({
-              user_id: user.id,
-              zone_id: zoneId,
-              plantmaterial_id: pid,
-            }));
-            const { error } = await supabase.from('zone_plantmaterial').insert(rows);
-            if (error) throw error;
-            await (updateZone as any).mutateAsync({ id: zoneId, plant_count: selectedIds.length });
+          const selectedMaterials = sectionPlants[idx] || [];
+          if (zoneId && selectedMaterials.length > 0 && user) {
+            // Find plant material IDs from names
+            const materialIds = selectedMaterials.map(materialName => {
+              const plant = plantmaterial.find(p => 
+                (p.common_name || p.scientific_name) === materialName
+              );
+              return plant?.id;
+            }).filter(Boolean);
+            
+            if (materialIds.length > 0) {
+              const rows = materialIds.map(pid => ({
+                user_id: user.id,
+                zone_id: zoneId,
+                plantmaterial_id: pid,
+              }));
+              const { error } = await supabase.from('zone_plantmaterial').insert(rows);
+              if (error) throw error;
+              await (updateZone as any).mutateAsync({ id: zoneId, plant_count: materialIds.length });
+            }
           }
         })
       );
@@ -106,9 +116,19 @@ const Zones = () => {
       // Replace plant links
       await supabase.from('zone_plantmaterial').delete().eq('zone_id', editZone.id);
       if (user && editPlants.length > 0) {
-        const rows = editPlants.map(pid => ({ user_id: user.id, zone_id: editZone.id, plantmaterial_id: pid }));
-        const { error } = await supabase.from('zone_plantmaterial').insert(rows);
-        if (error) throw error;
+        // Find plant material IDs from names
+        const materialIds = editPlants.map(materialName => {
+          const plant = plantmaterial.find(p => 
+            (p.common_name || p.scientific_name) === materialName
+          );
+          return plant?.id;
+        }).filter(Boolean);
+        
+        if (materialIds.length > 0) {
+          const rows = materialIds.map(pid => ({ user_id: user.id, zone_id: editZone.id, plantmaterial_id: pid }));
+          const { error } = await supabase.from('zone_plantmaterial').insert(rows);
+          if (error) throw error;
+        }
       }
       // Update zone attributes and trigger refetch via mutation
       await (updateZone as any).mutateAsync({ id: editZone.id, name: editName || editZone.name, plant_count: editPlants.length });
@@ -236,8 +256,8 @@ const Zones = () => {
                       </div>
                       <div>
                         <Label className="text-sm">Plants in this section</Label>
-                        <PlantMaterialMultiSelect
-                          value={sectionPlants[i] ?? []}
+                        <MaterialsMultiSelectDropdown
+                          values={sectionPlants[i] ?? []}
                           onChange={(val) => setSectionPlants(prev => {
                             const next = [...prev];
                             next[i] = val;
@@ -375,8 +395,12 @@ const Zones = () => {
                                   onClick={() => {
                                     setEditZone(zone);
                                     setEditName(zone.name);
-                                    const ids = (zone as any)?.zone_plantmaterial?.map((zp: any) => zp?.plantmaterial?.id).filter((id: any) => typeof id === 'number') || [];
-                                    setEditPlants(ids);
+                                   // Convert plant materials to names for the new component
+                                    const materialNames = (zone as any)?.zone_plantmaterial?.map((zp: any) => {
+                                      const plant = zp?.plantmaterial;
+                                      return plant?.common_name || plant?.scientific_name;
+                                    }).filter(Boolean) || [];
+                                    setEditPlants(materialNames);
                                   }}
                                 >
                                   Edit
@@ -471,8 +495,8 @@ const Zones = () => {
             </div>
             <div>
               <Label className="text-sm">Plants in this section</Label>
-              <PlantMaterialMultiSelect
-                value={editPlants}
+              <MaterialsMultiSelectDropdown
+                values={editPlants}
                 onChange={setEditPlants}
                 placeholder="Type to search and select plants"
               />
