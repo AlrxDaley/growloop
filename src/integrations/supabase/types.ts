@@ -230,6 +230,7 @@ export type Database = {
           priority: string
           recurring: boolean | null
           status: string
+          task_type: string | null
           title: string
           updated_at: string
           user_id: string
@@ -246,6 +247,7 @@ export type Database = {
           priority?: string
           recurring?: boolean | null
           status?: string
+          task_type?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -262,6 +264,7 @@ export type Database = {
           priority?: string
           recurring?: boolean | null
           status?: string
+          task_type?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -411,42 +414,69 @@ export type Database = {
       }
       zones: {
         Row: {
+          area_size_unit: string | null
+          area_size_value: number | null
           client_id: string
           created_at: string
           id: string
+          last_watered_at: string | null
           name: string
           notes: string | null
           plant_count: number | null
           size: string | null
           soil_type: string | null
+          soil_type_enum: string | null
+          soil_type_other: string | null
+          sun_hours_estimate: number | null
+          sun_modifiers: string[] | null
+          sun_notes: string | null
+          sun_primary: string | null
           sunlight: string | null
           updated_at: string
           user_id: string
           watering_schedule: string | null
         }
         Insert: {
+          area_size_unit?: string | null
+          area_size_value?: number | null
           client_id: string
           created_at?: string
           id?: string
+          last_watered_at?: string | null
           name: string
           notes?: string | null
           plant_count?: number | null
           size?: string | null
           soil_type?: string | null
+          soil_type_enum?: string | null
+          soil_type_other?: string | null
+          sun_hours_estimate?: number | null
+          sun_modifiers?: string[] | null
+          sun_notes?: string | null
+          sun_primary?: string | null
           sunlight?: string | null
           updated_at?: string
           user_id: string
           watering_schedule?: string | null
         }
         Update: {
+          area_size_unit?: string | null
+          area_size_value?: number | null
           client_id?: string
           created_at?: string
           id?: string
+          last_watered_at?: string | null
           name?: string
           notes?: string | null
           plant_count?: number | null
           size?: string | null
           soil_type?: string | null
+          soil_type_enum?: string | null
+          soil_type_other?: string | null
+          sun_hours_estimate?: number | null
+          sun_modifiers?: string[] | null
+          sun_notes?: string | null
+          sun_primary?: string | null
           sunlight?: string | null
           updated_at?: string
           user_id?: string
