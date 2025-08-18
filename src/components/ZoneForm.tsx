@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { Zone } from '@/hooks/useZones';
-import { MaterialsMultiSelectDropdown } from '@/components/MaterialsMultiSelectDropdown';
 
 const soilTypes = ['Clay', 'Loam', 'Sand', 'Silt', 'Chalk', 'Peat', 'Other'] as const;
 const areaSizeUnits = ['m²', 'ft²', 'acre'] as const;
@@ -46,7 +45,6 @@ const zoneSchema = z.object({
   sun_hours_estimate: z.number().min(0).max(24).optional().nullable(),
   sun_notes: z.string().optional(),
   notes: z.string().optional(),
-  plant_materials: z.array(z.string()).default([]),
 }).refine((data) => {
   if (data.soil_type_enum === 'Other' && !data.soil_type_other?.trim()) {
     return false;
@@ -95,7 +93,6 @@ export const ZoneForm: React.FC<ZoneFormProps> = ({
       sun_hours_estimate: zone?.sun_hours_estimate || null,
       sun_notes: zone?.sun_notes || '',
       notes: zone?.notes || '',
-      plant_materials: zone?.plants?.map(p => p.name) || [],
     },
   });
 
@@ -340,23 +337,6 @@ export const ZoneForm: React.FC<ZoneFormProps> = ({
                 placeholder="Additional notes about sun exposure..."
                 rows={2}
               />
-            </div>
-          </div>
-
-          {/* Plant Materials */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Plant Materials</h3>
-            <div>
-              <Label htmlFor="plant_materials">Select Plants</Label>
-              <MaterialsMultiSelectDropdown
-                values={watch('plant_materials') || []}
-                onChange={(values) => setValue('plant_materials', values)}
-                placeholder="Select plant materials for this zone..."
-                className="w-full"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Choose from the plant materials catalog
-              </p>
             </div>
           </div>
 
