@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, Plus } from "lucide-react";
 import { useZones } from "@/hooks/useZones";
 import { useClients } from "@/hooks/useClients";
@@ -9,6 +11,7 @@ import { ZoneForm } from "@/components/ZoneForm";
 import { ZoneCard } from "@/components/ZoneCard";
 
 export default function Zones() {
+  const navigate = useNavigate();
   const { zones, createZone, updateZone, deleteZone, isLoading } = useZones();
   const { clients } = useClients();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -49,6 +52,10 @@ export default function Zones() {
     }
   };
 
+  const handleViewDetails = (id: string) => {
+    navigate(`/zones/${id}`);
+  };
+
   const handleCloseAdd = () => {
     setIsAddDialogOpen(false);
   };
@@ -62,6 +69,23 @@ export default function Zones() {
     zone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     zone.client?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Group zones by client
+  const groupedZones = filteredZones.reduce((acc, zone) => {
+    const clientName = zone.client?.name || 'Unassigned';
+    if (!acc[clientName]) {
+      acc[clientName] = [];
+    }
+    acc[clientName].push(zone);
+    return acc;
+  }, {} as Record<string, typeof zones>);
+
+  // Sort client names alphabetically, but put "Unassigned" first
+  const sortedClientNames = Object.keys(groupedZones).sort((a, b) => {
+    if (a === 'Unassigned') return -1;
+    if (b === 'Unassigned') return 1;
+    return a.localeCompare(b);
+  });
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-64">Loading zones...</div>;
@@ -107,25 +131,42 @@ export default function Zones() {
         />
       </div>
 
-      {/* Zones Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredZones.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <p className="text-muted-foreground">
-              {searchTerm ? "No zones found matching your search." : "No zones created yet. Click 'Add Zone' to get started."}
-            </p>
-          </div>
-        ) : (
-          filteredZones.map((zone) => (
-            <ZoneCard
-              key={zone.id}
-              zone={zone}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))
-        )}
-      </div>
+      {/* Zones Grouped by Client */}
+      {filteredZones.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            {searchTerm ? "No zones found matching your search." : "No zones created yet. Click 'Add Zone' to get started."}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {sortedClientNames.map((clientName) => (
+            <Card key={clientName} className="rounded-xl">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {clientName} 
+                  <span className="text-sm font-normal text-muted-foreground ml-2">
+                    ({groupedZones[clientName].length} zone{groupedZones[clientName].length !== 1 ? 's' : ''})
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {groupedZones[clientName].map((zone) => (
+                    <ZoneCard
+                      key={zone.id}
+                      zone={zone}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onViewDetails={handleViewDetails}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

@@ -3,16 +3,17 @@ import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Droplets, Edit2, MapPin, Sun, Trash2 } from 'lucide-react';
+import { Droplets, Edit2, Eye, MapPin, Sun, Trash2 } from 'lucide-react';
 import { Zone } from '@/hooks/useZones';
 
 interface ZoneCardProps {
   zone: Zone;
   onEdit: (zone: Zone) => void;
   onDelete: (id: string) => void;
+  onViewDetails: (id: string) => void;
 }
 
-export const ZoneCard: React.FC<ZoneCardProps> = ({ zone, onEdit, onDelete }) => {
+export const ZoneCard: React.FC<ZoneCardProps> = ({ zone, onEdit, onDelete, onViewDetails }) => {
   const formatLastWatered = (dateString?: string) => {
     if (!dateString) return '—';
     try {
@@ -50,6 +51,14 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zone, onEdit, onDelete }) =>
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg font-semibold">{zone.name}</CardTitle>
           <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onViewDetails(zone.id)}
+              className="rounded-lg"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
             <Button
               variant="ghost"
               size="sm"

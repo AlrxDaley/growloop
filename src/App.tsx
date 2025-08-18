@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
 import Tasks from "./pages/Tasks";
 import Zones from "./pages/Zones";
+import ZoneDetails from "./pages/ZoneDetails";
 import Photos from "./pages/Photos";
 import Schedule from "./pages/Schedule";
 import Index from "./pages/Index";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/clients" element={<Layout><Clients /></Layout>} />
             <Route path="/tasks" element={<Layout><Tasks /></Layout>} />
             <Route path="/zones" element={<Layout><Zones /></Layout>} />
+            <Route path="/zones/:id" element={<Layout><ZoneDetails /></Layout>} />
             <Route path="/photos" element={<Layout><Photos /></Layout>} />
             <Route path="/schedule" element={<Layout><Schedule /></Layout>} />
             

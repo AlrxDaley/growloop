@@ -35,7 +35,7 @@ const sunModifierOptions = [
 
 const zoneSchema = z.object({
   name: z.string().min(1, 'Zone name is required'),
-  client_id: z.string().min(1, 'Client is required'),
+  client_id: z.string().optional(),
   soil_type_enum: z.enum(soilTypes, { required_error: 'Soil type is required' }),
   soil_type_other: z.string().optional(),
   area_size_value: z.number().min(0.1, 'Area size must be greater than 0'),
@@ -135,15 +135,16 @@ export const ZoneForm: React.FC<ZoneFormProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="client_id">Client *</Label>
+              <Label htmlFor="client_id">Client</Label>
               <Select 
-                value={watch('client_id')} 
-                onValueChange={(value) => setValue('client_id', value)}
+                value={watch('client_id') || ''} 
+                onValueChange={(value) => setValue('client_id', value || undefined)}
               >
                 <SelectTrigger className="rounded-lg">
-                  <SelectValue placeholder="Select a client" />
+                  <SelectValue placeholder="Assign a client (optional)" />
                 </SelectTrigger>
                 <SelectContent className="rounded-lg max-h-60 overflow-y-auto">
+                  <SelectItem value="">Unassigned</SelectItem>
                   {clients.map((client) => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.name}
